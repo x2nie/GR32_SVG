@@ -1,0 +1,46 @@
+package SVGPackage;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS OFF}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS OFF}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO OFF}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'MWK - SVG'}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vcl,
+  MSXMLPackage,
+  ListPackage,
+  GDIPlusPackage;
+
+contains
+  SVG in 'SVG.pas',
+  SVGColor in 'SVGColor.pas',
+  SVGPaint in 'SVGPaint.pas',
+  SVGParse in 'SVGParse.pas',
+  SVGPath in 'SVGPath.pas',
+  SVGProperties in 'SVGProperties.pas',
+  SVGStyle in 'SVGStyle.pas',
+  SVGTypes in 'SVGTypes.pas',
+  SVGCommon in 'SVGCommon.pas';
+
+end.
