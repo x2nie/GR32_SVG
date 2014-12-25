@@ -87,7 +87,7 @@ type
     procedure CalculateMatrices;
 
     procedure PaintToGraphics(Graphics: TBitmap32); virtual; abstract;
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); virtual; abstract;
+    procedure PaintToPath(Path: TFlattenedPath); virtual; abstract;
     procedure ReadIn(const Node: PXMLNode); virtual;
 
     property Items[Index: Integer]: TSVGObject read GetItem write SetItem; default;
@@ -146,7 +146,7 @@ type
     FTextDecoration: TTextDecoration;
 
     FPath: TFlattenedPath;
-    FClipPath: TArrayOfArrayOfFloatPoint;
+    FClipPath: TFlattenedPath;
     FX: TFloat;
     FY: TFloat;
     FWidth: TFloat;
@@ -190,7 +190,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
     procedure ReadStyle(Style: TStyle); virtual;
     procedure ConstructPath; virtual;
-    function GetClipPath: TArrayOfArrayOfFloatPoint;
+    function GetClipPath: TFlattenedPath;
     procedure CalcClipPath;
     {$IFDEF GPPen}
     function GetFillBrush: TGPBrush;
@@ -207,7 +207,7 @@ type
     procedure Clear; override;
     procedure PaintToGraphics(Graphics: TBitmap32); override;
 
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure PaintToPath(Path: TFlattenedPath); override;
     procedure ReadIn(const Node: PXMLNode); override;
 
     property Root: TSVG read GetRoot;
@@ -339,7 +339,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
     procedure Construct;
   public
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure PaintToPath(Path: TFlattenedPath); override;
     procedure PaintToGraphics(Graphics: TBitmap32); override;
     procedure Clear; override;
     procedure ReadIn(const Node: PXMLNode); override;
@@ -509,17 +509,17 @@ type
   {$ENDIF}
   TSVGClipPath = class(TSVGBasic)
   private
-    FClipPath: TArrayOfArrayOfFloatPoint;
+    FClipPath: TFlattenedPath;
   protected
     function New(Parent: TSVGObject): TSVGObject; override;
     procedure ConstructClipPath;
   public
     destructor Destroy; override;
     procedure Clear; override;
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure PaintToPath(Path: TFlattenedPath); override;
     procedure PaintToGraphics(Graphics: TBitmap32); override;
     procedure ReadIn(const Node: PXMLNode); override;
-    function GetClipPath: TArrayOfArrayOfFloatPoint;
+    function GetClipPath: TFlattenedPath;
   end;
 
 implementation
@@ -1127,7 +1127,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TSVGBasic.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGBasic.PaintToPath(Path: TFlattenedPath);
 var
   P: TArrayOfArrayOfFloatPoint;
   M: TFloatMatrix;
@@ -1990,7 +1990,7 @@ begin
   FreeAndNil(FPath);
 end;
 
-function TSVGBasic.GetClipPath: TArrayOfArrayOfFloatPoint;
+function TSVGBasic.GetClipPath: TFlattenedPath;
 var
   Path: TSVGObject;
   ClipRoot: TSVGClipPath;
@@ -2768,7 +2768,7 @@ procedure TSVGUse.PaintToGraphics(Graphics: TBitmap32);
 begin
 end;
 
-procedure TSVGUse.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGUse.PaintToPath(Path: TFlattenedPath);
 var
   UseObject: TSVGBasic;
 begin
@@ -3195,7 +3195,7 @@ begin
   for C := 0 to Count - 1 do
   begin
     Element := TSVGPathElement(Items[C]);
-    //x2nie Element.AddToPath(FPath);
+    Element.AddToPath(FPath);
   end;
 end;
 
@@ -3981,7 +3981,7 @@ end;
 {$ENDIF}
 // TSVGClipPath
 
-procedure TSVGClipPath.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGClipPath.PaintToPath(Path: TFlattenedPath);
 begin
 end;
 
@@ -4008,7 +4008,7 @@ procedure TSVGClipPath.ConstructClipPath;
   end;
 
 begin
-  //FClipPath := TArrayOfArrayOfFloatPoint.Create;
+  FClipPath := TFlattenedPath.Create;
   AddPath(Self);
 end;
 
@@ -4018,7 +4018,7 @@ begin
   inherited;
 end;
 
-function TSVGClipPath.GetClipPath: TArrayOfArrayOfFloatPoint;
+function TSVGClipPath.GetClipPath: TFlattenedPath;
 begin
   if not Assigned(FClipPath) then
     ConstructClipPath;

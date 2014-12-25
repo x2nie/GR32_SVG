@@ -22,7 +22,7 @@ interface
 uses
   Windows, Classes,
   //GDIPOBJ,
-  GR32,
+  GR32,  GR32_Paths,
   SVGTypes, SVG;
 
 type
@@ -37,12 +37,12 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     function GetBounds: TFRect; virtual; abstract;
-    procedure AddToPath(Path: TArrayOfArrayOfFloatPoint); virtual; abstract;
+    procedure AddToPath(Path: TFlattenedPath); virtual; abstract;
     procedure Read(SL: TStrings; var Position: Integer;
       Previous: TSVGPathElement); virtual;
 
     procedure PaintToGraphics(Graphics: TBitmap32); override;
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure PaintToPath(Path: TFlattenedPath); override;
 
     property StartX: TFloat read FStartX write FStartX;
     property StartY: TFloat read FStartY write FStartY;
@@ -56,7 +56,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     function GetBounds: TFRect; override;
-    procedure AddToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure AddToPath(Path: TFlattenedPath); override;
     procedure Read(SL: TStrings; var Position: Integer;
       Previous: TSVGPathElement); override;
   end;
@@ -67,7 +67,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     function GetBounds: TFRect; override;
-    procedure AddToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure AddToPath(Path: TFlattenedPath); override;
     procedure Read(SL: TStrings; var Position: Integer;
       Previous: TSVGPathElement); override;
   end;
@@ -83,7 +83,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     function GetBounds: TFRect; override;
-    procedure AddToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure AddToPath(Path: TFlattenedPath); override;
     procedure Read(SL: TStrings; var Position: Integer;
       Previous: TSVGPathElement); override;
 
@@ -105,7 +105,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     function GetBounds: TFRect; override;
-    procedure AddToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure AddToPath(Path: TFlattenedPath); override;
     procedure Read(SL: TStrings; var Position: Integer;
       Previous: TSVGPathElement); override;
 
@@ -122,7 +122,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     function GetBounds: TFRect; override;
-    procedure AddToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure AddToPath(Path: TFlattenedPath); override;
     procedure Read(SL: TStrings; var Position: Integer;
       Previous: TSVGPathElement); override;
   end;
@@ -167,7 +167,7 @@ procedure TSVGPathElement.PaintToGraphics(Graphics: TBitmap32);
 begin
 end;
 
-procedure TSVGPathElement.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGPathElement.PaintToPath(Path: TFlattenedPath);
 begin
 end;
 
@@ -184,9 +184,9 @@ begin
   Result := TSVGPathMove.Create(Parent);
 end;
 
-procedure TSVGPathMove.AddToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGPathMove.AddToPath(Path: TFlattenedPath);
 begin
-  //x2nie Path.StartFigure;
+  Path.BeginPath;
 end;
 
 procedure TSVGPathMove.Read(SL: TStrings; var Position: Integer;
@@ -223,9 +223,11 @@ begin
   Result := TSVGPathLine.Create(Parent);
 end;
 
-procedure TSVGPathLine.AddToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGPathLine.AddToPath(Path: TFlattenedPath);
 begin
   //x2niePath.AddLine(FStartX, FStartY, FStopX, FStopY);
+  Path.MoveTo(FStartX, FStartY);
+  Path.LineTo(FStopX, FStopY);
 end;
 
 procedure TSVGPathLine.Read(SL: TStrings; var Position: Integer;
@@ -309,10 +311,12 @@ begin
   Result := TSVGPathCurve.Create(Parent);
 end;
 
-procedure TSVGPathCurve.AddToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGPathCurve.AddToPath(Path: TFlattenedPath);
 begin
   //x2niePath.AddBezier(FStartX, FStartY, FControl1X, FControl1Y,
     //FControl2X, FControl2Y, FStopX, FStopY);
+  Path.CurveTo({FStartX, FStartY,} FControl1X, FControl1Y,
+    FControl2X, FControl2Y, FStopX, FStopY);
 end;
 
 procedure TSVGPathCurve.Read(SL: TStrings; var Position: Integer;
@@ -444,7 +448,7 @@ begin
   Result := TSVGPathEllipticArc.Create(Parent);
 end;
 
-procedure TSVGPathEllipticArc.AddToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGPathEllipticArc.AddToPath(Path: TFlattenedPath);
 var
   R: TFloatRect;
   X1, Y1, X2, Y2: TFloat;
@@ -544,6 +548,7 @@ begin
   end;
 
   //x2niePath.AddArc(R, StartAngle, SweepAngle);
+  Path.Arc(FloatPoint(CenterX,CenterY), StartAngle, SweepAngle, FRX);
 end;
 
 procedure TSVGPathEllipticArc.Read(SL: TStrings; var Position: Integer;
@@ -604,9 +609,9 @@ begin
   FStopY := FStartY;
 end;
 
-procedure TSVGPathClose.AddToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGPathClose.AddToPath(Path: TFlattenedPath);
 begin
-  //x2niePath.CloseFigure;
+  Path.ClosePath;
 end;
 
 end.

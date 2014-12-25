@@ -26,7 +26,7 @@ uses
   OXmlCDOM, OXmlPDOM, OXmlSAX, OXmlSeq, OXmlSerialize,
 
   //GDIPOBJ, GDIPAPI,
-  GR32, GR32_Transforms,
+  GR32, GR32_Paths, GR32_Transforms,
   SVGTypes, SVG;
 
 type
@@ -48,7 +48,7 @@ type
   public
     procedure ReadIn(const Node: PXMLNode); override;
     procedure PaintToGraphics(Graphics: TBitmap32); override;
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure PaintToPath(Path: TFlattenedPath); override;
 
     property Stop: TFloat read FStop write FStop;
     property StopColor: TColor read FStopColor write FStopColor;
@@ -66,7 +66,7 @@ type
     function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; virtual; abstract;
     {$ENDIF}
     procedure PaintToGraphics(Graphics: TBitmap32); override;
-    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
+    procedure PaintToPath(Path: TFlattenedPath); override;
   end;
 
   TSVGGradient = class(TSVGFiller)
@@ -134,7 +134,7 @@ uses
 
 // TSVGStop
 
-procedure TSVGStop.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGStop.PaintToPath(Path: TFlattenedPath);
 begin
 end;
 
@@ -188,7 +188,7 @@ end;
 
 // TSVGFiller
 
-procedure TSVGFiller.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
+procedure TSVGFiller.PaintToPath(Path: TFlattenedPath);
 begin
 end;           
 
