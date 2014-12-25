@@ -21,7 +21,7 @@ interface
 
 uses
   Classes,
-  SVGTypes, Matrix;
+  SVGTypes, GR32_Transforms;
 
 function ParseAngle(const Angle: WideString): TFloat;
 
@@ -41,7 +41,7 @@ function ParseDRect(const S: WideString): TFRect;
 
 function ParseURI(const URI: WideString): WideString;
 
-function ParseTransform(const ATransform: WideString): TMatrix;
+function ParseTransform(const ATransform: WideString): TFloatMatrix;
 
 procedure DecodeBase64(const S: AnsiString; St: TStream);
 
@@ -277,7 +277,7 @@ begin
     Result := Copy(S, 6, Length(S) - 6);
 end;
 
-function GetMatrix(const S: WideString): TMatrix;
+function GetMatrix(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
 begin
@@ -286,18 +286,18 @@ begin
   SL := GetValues(S, ',');
   if SL.Count = 6 then
   begin
-    Result.Cells[0, 0] := StrToTFloat(SL[0]);
-    Result.Cells[0, 1] := StrToTFloat(SL[1]);
-    Result.Cells[1, 0] := StrToTFloat(SL[2]);
-    Result.Cells[1, 1] := StrToTFloat(SL[3]);
-    Result.Cells[2, 0] := StrToTFloat(SL[4]);
-    Result.Cells[2, 1] := StrToTFloat(SL[5]);
-    Result.Cells[2, 2] := 1;
+    Result[0, 0] := StrToTFloat(SL[0]);
+    Result[0, 1] := StrToTFloat(SL[1]);
+    Result[1, 0] := StrToTFloat(SL[2]);
+    Result[1, 1] := StrToTFloat(SL[3]);
+    Result[2, 0] := StrToTFloat(SL[4]);
+    Result[2, 1] := StrToTFloat(SL[5]);
+    Result[2, 2] := 1;
   end;
   SL.Free;
 end;
 
-function GetTranslate(const S: WideString): TMatrix;
+function GetTranslate(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
 begin
@@ -308,18 +308,18 @@ begin
 
   if SL.Count = 2 then
   begin
-    Result.Cells[0, 0] := 1;
-    Result.Cells[0, 1] := 0;
-    Result.Cells[1, 0] := 0;
-    Result.Cells[1, 1] := 1;
-    Result.Cells[2, 0] := StrToTFloat(SL[0]);
-    Result.Cells[2, 1] := StrToTFloat(SL[1]);
-    Result.Cells[2, 2] := 1;
+    Result[0, 0] := 1;
+    Result[0, 1] := 0;
+    Result[1, 0] := 0;
+    Result[1, 1] := 1;
+    Result[2, 0] := StrToTFloat(SL[0]);
+    Result[2, 1] := StrToTFloat(SL[1]);
+    Result[2, 2] := 1;
   end;
   SL.Free;
 end;
 
-function GetScale(const S: WideString): TMatrix;
+function GetScale(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
 begin
@@ -329,18 +329,18 @@ begin
     SL.Add(SL[0]);
   if SL.Count = 2 then
   begin
-    Result.Cells[0, 0] := StrToTFloat(SL[0]);
-    Result.Cells[0, 1] := 0;
-    Result.Cells[1, 0] := 0;
-    Result.Cells[1, 1] := StrToTFloat(SL[1]);
-    Result.Cells[2, 0] := 0;
-    Result.Cells[2, 1] := 0;
-    Result.Cells[2, 2] := 1;
+    Result[0, 0] := StrToTFloat(SL[0]);
+    Result[0, 1] := 0;
+    Result[1, 0] := 0;
+    Result[1, 1] := StrToTFloat(SL[1]);
+    Result[2, 0] := 0;
+    Result[2, 1] := 0;
+    Result[2, 2] := 1;
   end;
   SL.Free;
 end;
 
-function GetRotation(const S: WideString): TMatrix;
+function GetRotation(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
   X, Y, Angle: TFloat;
@@ -359,11 +359,12 @@ begin
     Y := 0;
   end;
   SL.Free;
-
+  {$IFDEF GPPen}
   Result := CalcRotationMatrix(X, Y, Angle);
+  {$ENDIF}
 end;
 
-function GetSkewX(const S: WideString): TMatrix;
+function GetSkewX(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
 begin
@@ -372,18 +373,18 @@ begin
   SL := GetValues(S, ',');
   if SL.Count = 1 then
   begin
-    Result.Cells[0, 0] := 1;
-    Result.Cells[0, 1] := 0;
-    Result.Cells[1, 0] := Tan(StrToTFloat(SL[0]));
-    Result.Cells[1, 1] := 1;
-    Result.Cells[2, 0] := 0;
-    Result.Cells[2, 1] := 0;
-    Result.Cells[2, 2] := 1;
+    Result[0, 0] := 1;
+    Result[0, 1] := 0;
+    Result[1, 0] := Tan(StrToTFloat(SL[0]));
+    Result[1, 1] := 1;
+    Result[2, 0] := 0;
+    Result[2, 1] := 0;
+    Result[2, 2] := 1;
   end;
   SL.Free;
 end;
 
-function GetSkewY(const S: WideString): TMatrix;
+function GetSkewY(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
 begin
@@ -392,24 +393,24 @@ begin
   SL := GetValues(S, ',');
   if SL.Count = 1 then
   begin
-    Result.Cells[0, 0] := 1;
-    Result.Cells[0, 1] := Tan(StrToTFloat(SL[0]));
-    Result.Cells[1, 0] := 0;
-    Result.Cells[1, 1] := 1;
-    Result.Cells[2, 0] := 0;
-    Result.Cells[2, 1] := 0;
-    Result.Cells[2, 2] := 1;
+    Result[0, 0] := 1;
+    Result[0, 1] := Tan(StrToTFloat(SL[0]));
+    Result[1, 0] := 0;
+    Result[1, 1] := 1;
+    Result[2, 0] := 0;
+    Result[2, 1] := 0;
+    Result[2, 2] := 1;
   end;
   SL.Free;
 end;
 
-function ParseTransform(const ATransform: WideString): TMatrix;
+function ParseTransform(const ATransform: WideString): TFloatMatrix;
 var
   Start, Stop: Integer;
   TType: WideString;
   Values: WideString;
   S: WideString;
-  M: TMatrix;
+  M: TFloatMatrix;
 begin
   FillChar(Result, SizeOf(Result), 0);
 
@@ -424,7 +425,7 @@ begin
     TType := Copy(S, 1, Start - 1);
     Values := Trim(Copy(S, Start + 1, Stop - Start - 1));
     Values := StringReplace(Values, ' ', ',', [rfReplaceAll]);
-    M.Cells[2, 2] := 0;
+    M[2, 2] := 0;
 
     if TType = 'matrix' then
       M := GetMatrix(Values);
@@ -444,12 +445,12 @@ begin
     if TType = 'skewY' then
       M := GetSkewY(Values);
 
-    if M.Cells[2, 2] = 1 then
+    if M[2, 2] = 1 then
     begin
-      if Result.Cells[2, 2] = 0 then
+      if Result[2, 2] = 0 then
         Result := M
       else
-        Result := MultiplyMatrices(Result, M);
+        Result := Mult(Result, M);
     end;
 
     S := Trim(Copy(S, Stop + 1, Length(S)));

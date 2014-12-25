@@ -20,8 +20,8 @@ unit SVGTypes;
 interface
 
 uses
-  Windows, Math,
-  GDIPAPI;
+  Windows, Math;
+  //GDIPAPI;
 
 const
   INHERIT = -1;
@@ -69,16 +69,16 @@ type
     BottomRight: TFPoint;
   end;
 
-function ToGPPoint(const Point: TFPoint): TGPPointF;
+//function ToGPPoint(const Point: TFPoint): TGPPointF;
 
 function Intersect(const Bounds: TBounds; const Rect: TRect): Boolean;
 
 implementation
 
-function ToGPPoint(const Point: TFPoint): TGPPointF;
+{function ToGPPoint(const Point: TFPoint): TGPPointF;
 begin
   Result := MakePoint(Point.X, Point.Y);
-end;
+end;}
 
 function Intersect(const Bounds: TBounds; const Rect: TRect): Boolean;
 var

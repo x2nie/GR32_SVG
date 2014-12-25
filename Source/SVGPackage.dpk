@@ -28,9 +28,10 @@ package SVGPackage;
 requires
   rtl,
   vcl,
-  MSXMLPackage,
+  OXML_R7,
   ListPackage,
-  GDIPlusPackage;
+  GDIPlusPackage,
+  GR32_D7;
 
 contains
   SVG in 'SVG.pas',

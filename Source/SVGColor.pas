@@ -38,8 +38,8 @@ function ConvertColor(Color: TColor; Alpha: Byte): Cardinal;
 implementation
 
 uses
-  Windows, SysUtils,
-  GDIPAPI;
+  Windows, SysUtils;
+  //GDIPAPI;
 
 function IsHex(const S: WideString): Boolean;
 var
@@ -216,7 +216,8 @@ begin
   R := (Color and $000000FF);
   G := (Color and $0000FF00) shr 8;
   B := (Color and $00FF0000) shr 16;
-  Result := MakeColor(Alpha, R, G, B);
+  //Result := MakeColor(Alpha, R, G, B);
+  Result := Alpha shl 24 or R shl 16 or G shl 8 or B;
 end;
 
 

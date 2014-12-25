@@ -21,13 +21,17 @@ interface
 
 uses
   Windows, Classes, Graphics,
-  MSXML2_TLB_Light,
-  GDIPOBJ, GDIPAPI,
+  //MSXML2_TLB_Light,
+  OEncoding, OWideSupp, OTextReadWrite, OXmlReadWrite, OXmlUtils,
+  OXmlCDOM, OXmlPDOM, OXmlSAX, OXmlSeq, OXmlSerialize,
+
+  //GDIPOBJ, GDIPAPI,
+  GR32, GR32_Transforms,
   SVGTypes, SVG;
 
 type
   TColors = record
-    Colors: packed array of ARGB;
+    Colors: packed array of Cardinal;// ARGB;
     Positions: packed array of Single;
     Count: Integer;
   end;
@@ -42,9 +46,9 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
     procedure Assign(SVG: TSVGObject); override;
   public
-    procedure ReadIn(const Node: IXMLDOMNode); override;
-    procedure PaintToGraphics(Graphics: TGPGraphics); override;
-    procedure PaintToPath(Path: TGPGraphicsPath); override;
+    procedure ReadIn(const Node: PXMLNode); override;
+    procedure PaintToGraphics(Graphics: TBitmap32); override;
+    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
 
     property Stop: TFloat read FStop write FStop;
     property StopColor: TColor read FStopColor write FStopColor;
@@ -57,10 +61,12 @@ type
   protected
     function New(Parent: TSVGObject): TSVGObject; override;
   public
-    procedure ReadIn(const Node: IXMLDOMNode); override;
+    procedure ReadIn(const Node: PXMLNode); override;
+    {$IFDEF GPPen}
     function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; virtual; abstract;
-    procedure PaintToGraphics(Graphics: TGPGraphics); override;
-    procedure PaintToPath(Path: TGPGraphicsPath); override;
+    {$ENDIF}
+    procedure PaintToGraphics(Graphics: TBitmap32); override;
+    procedure PaintToPath(Path: TArrayOfArrayOfFloatPoint); override;
   end;
 
   TSVGGradient = class(TSVGFiller)
@@ -70,7 +76,7 @@ type
   protected
     function GetColors(Alpha: Byte): TColors; virtual;
   public
-    procedure ReadIn(const Node: IXMLDOMNode); override;
+    procedure ReadIn(const Node: PXMLNode); override;
   end;
 
   TSVGLinearGradient = class(TSVGGradient)
@@ -83,8 +89,10 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
     procedure Assign(SVG: TSVGObject); override;
   public
-    procedure ReadIn(const Node: IXMLDOMNode); override;
+    procedure ReadIn(const Node: PXMLNode); override;
+    {$IFDEF GPPen}
     function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; override;
+    {$ENDIF}
 
     property X1: TFloat read FX1 write FX1;
     property Y1: TFloat read FY1 write FY1;
@@ -104,8 +112,10 @@ type
     procedure Assign(SVG: TSVGObject); override;
   public
     procedure Clear; override;
-    procedure ReadIn(const Node: IXMLDOMNode); override;
+    procedure ReadIn(const Node: PXMLNode); override;
+    {$IFDEF GPPen}
     function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; override;
+    {$ENDIF}
 
     property CX: TFloat read FCX write FCX;
     property CY: TFloat read FCY write FCY;
@@ -119,15 +129,16 @@ implementation
 
 uses
   SysUtils,
-  Matrix, SVGParse, SVGStyle, SVGProperties, SVGColor;
+  //Matrix,
+  SVGParse, SVGStyle, SVGProperties, SVGColor;
 
 // TSVGStop
 
-procedure TSVGStop.PaintToPath(Path: TGPGraphicsPath);
+procedure TSVGStop.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
 begin
 end;
 
-procedure TSVGStop.ReadIn(const Node: IXMLDOMNode);
+procedure TSVGStop.ReadIn(const Node: PXMLNode);
 var
   S: WideString;
 begin
@@ -171,17 +182,17 @@ begin
   Result := TSVGStop.Create(Parent);
 end;
 
-procedure TSVGStop.PaintToGraphics(Graphics: TGPGraphics);
+procedure TSVGStop.PaintToGraphics(Graphics: TBitmap32);
 begin
 end;
 
 // TSVGFiller
 
-procedure TSVGFiller.PaintToPath(Path: TGPGraphicsPath);
+procedure TSVGFiller.PaintToPath(Path: TArrayOfArrayOfFloatPoint);
 begin
 end;           
 
-procedure TSVGFiller.ReadIn(const Node: IXMLDOMNode);
+procedure TSVGFiller.ReadIn(const Node: PXMLNode);
 begin
   inherited;
   Display := 0;
@@ -192,13 +203,13 @@ begin
   Result := nil;
 end;
 
-procedure TSVGFiller.PaintToGraphics(Graphics: TGPGraphics);
+procedure TSVGFiller.PaintToGraphics(Graphics: TBitmap32);
 begin
 end;
 
 // TSVGGradient
 
-procedure TSVGGradient.ReadIn(const Node: IXMLDOMNode);
+procedure TSVGGradient.ReadIn(const Node: PXMLNode);
 var
   C: Integer;
   Stop: TSVGStop;
@@ -207,7 +218,7 @@ begin
 
   LoadGradientUnits(Node, FGradientUnits);
 
-  for C := 0 to Node.childNodes.length - 1 do
+  for C := 0 to Node.childNodes.Count - 1 do
    if Node.childNodes[C].nodeName = 'stop' then
    begin
      Stop := TSVGStop.Create(Self);
@@ -230,9 +241,9 @@ begin
   Result := TSVGLinearGradient.Create(Parent);
 end;
 
-procedure TSVGLinearGradient.ReadIn(const Node: IXMLDOMNode);
+procedure TSVGLinearGradient.ReadIn(const Node: PXMLNode);
 var
-  Matrix: TMatrix;
+  Matrix: TFloatMatrix;
 begin
   inherited;
   LoadLength(Node, 'x1', FX1);
@@ -257,6 +268,7 @@ begin
   end;
 end;
 
+{$IFDEF GPPen}
 function TSVGLinearGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush;
 var
   Brush: TGPLinearGradientBrush;
@@ -285,7 +297,7 @@ begin
 
   Result := Brush;
 end;
-
+{$ENDIF}
 // TSVGRadialGradient
 
 procedure TSVGRadialGradient.Assign(SVG: TSVGObject);
@@ -312,7 +324,7 @@ begin
   FFY := FCY;
 end;
 
-procedure TSVGRadialGradient.ReadIn(const Node: IXMLDOMNode);
+procedure TSVGRadialGradient.ReadIn(const Node: PXMLNode);
 begin
   inherited;
 
@@ -322,15 +334,15 @@ begin
   LoadLength(Node, 'fx', FFX);
   LoadLength(Node, 'fy', FFY);
 end;
-
+{$IFDEF GPPen}
 function TSVGRadialGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush;
 var
   Brush: TGPPathGradientBrush;
-  Path: TGPGraphicsPath;
+  Path: TArrayOfArrayOfFloatPoint;
   TGP: TGPMatrix;
   Colors: TColors;
 begin
-  Path := TGPGraphicsPath.Create;
+  Path := TArrayOfArrayOfFloatPoint.Create;
 
   if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
     Path.AddEllipse(DestObject.X, DestObject.Y, DestObject.Width, DestObject.Height)
@@ -356,7 +368,7 @@ begin
 
   Result := Brush;
 end;
-
+{$ENDIF}
 
 function TSVGRadialGradient.New(Parent: TSVGObject): TSVGObject;
 begin
