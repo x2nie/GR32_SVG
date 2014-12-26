@@ -3059,6 +3059,7 @@ begin
 
   S := StringReplace(S, ',', ' ', [rfReplaceAll]);
   S := StringReplace(S, '-', ' -', [rfReplaceAll]);
+  S := StringReplace(S, 'e -', 'e-', [rfReplaceAll]);
 
   ConstructPoints(S);
 
@@ -3253,10 +3254,13 @@ var
 begin
   Help := S;
   Insert(' ', Help, 2);
+  Help := StringReplace(Help, '-', ' -', [rfReplaceAll]);
+  Help := StringReplace(Help, 'e -', '-', [rfReplaceAll]);
 
   Result := TStringList.Create;
   Result.Delimiter := ' ';
-  Result.DelimitedText := StringReplace(Help, '-', ' -', [rfReplaceAll]);
+
+  Result.DelimitedText := Help;
 
   for C := Result.Count - 1 downto 0 do
     if Result[C] = '' then
