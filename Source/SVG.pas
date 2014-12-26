@@ -1123,7 +1123,11 @@ end;
 {$ELSE}
 begin
   if Assigned(FPath) then
-    PolyPolylineFS( Graphics, self.FPath.Path, clGray32);
+  begin
+    if Assigned(FPath.Points) then
+      FPath.ClosePath;
+    PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
+  end;
 end;
 {$ENDIF}
 

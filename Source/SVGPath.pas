@@ -186,7 +186,8 @@ end;
 
 procedure TSVGPathMove.AddToPath(Path: TFlattenedPath);
 begin
-  Path.BeginPath;
+  //Path.BeginPath;
+  Path.MoveTo(FStopX, FStopY);
 end;
 
 procedure TSVGPathMove.Read(SL: TStrings; var Position: Integer;
@@ -226,7 +227,7 @@ end;
 procedure TSVGPathLine.AddToPath(Path: TFlattenedPath);
 begin
   //x2niePath.AddLine(FStartX, FStartY, FStopX, FStopY);
-  Path.MoveTo(FStartX, FStartY);
+  //Path.MoveTo(FStartX, FStartY);
   Path.LineTo(FStopX, FStopY);
 end;
 
