@@ -3141,7 +3141,7 @@ procedure TSVGEllipse.ConstructPath;
 begin
   inherited;
   FPath := TFlattenedPath.Create;
-  FPath.Ellipse(X - Width, Y - Height, 2 * Width, 2 * Height);
+  FPath.Ellipse(X,Y, Width, Height);
 end;
 
 // TSVGPath
