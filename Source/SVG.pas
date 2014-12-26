@@ -1121,12 +1121,19 @@ begin
   end;
 end;
 {$ELSE}
+var Color : TColor32;
+  Opacity : Byte;
 begin
   if Assigned(FPath) then
   begin
     if Assigned(FPath.Points) then
       FPath.ClosePath;
-    PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
+    //PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
+    Opacity := Round(255 * FillOpacity);
+    Color := Color32(FillColor);
+    PColor32Entry(@Color)^.A := Opacity;
+
+    PolyPolygonFS(Graphics, self.FPath.Path, Color);
   end;
 end;
 {$ENDIF}
