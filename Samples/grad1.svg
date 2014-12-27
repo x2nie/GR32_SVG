@@ -92,6 +92,15 @@
        x2="214.08334"
        y2="103.03163"
        gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4354"
+       id="linearGradient8191"
+       x1="21.666668"
+       y1="96.332024"
+       x2="130.83333"
+       y2="96.332024"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -179,5 +188,14 @@
        height="19.166666"
        x="170"
        y="135.49869" />
+    <path
+       sodipodi:type="arc"
+       style="fill:url(#linearGradient8191);fill-opacity:1.0;stroke:none;stroke-width:1.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:0;stroke-opacity:1;stroke-dasharray:none"
+       id="path8183"
+       sodipodi:cx="76.25"
+       sodipodi:cy="96.332024"
+       sodipodi:rx="54.583332"
+       sodipodi:ry="22.5"
+       d="m 130.83333,96.332024 a 54.583332,22.5 0 1 1 -109.166662,0 54.583332,22.5 0 1 1 109.166662,0 z" />
   </g>
 </svg>

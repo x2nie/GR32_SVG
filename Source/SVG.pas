@@ -112,8 +112,8 @@ type
 //    function TransformComplete(P: TFPoint): TFPoint; overload;
 //    function TransformComplete(X, Y: TFloat): TFPoint; overload;
 
-    function Transform(P: TFPoint): TFPoint; overload;
-    function Transform(X, Y: TFloat): TFPoint; overload;
+    function Transform(P: TFloatPoint): TFloatPoint; overload;
+    function Transform(X, Y: TFloat): TFloatPoint; overload;
   protected
     procedure Assign(SVG: TSVGObject); override;
     //function New(Parent: TSVGObject): TSVGObject; override;
@@ -370,7 +370,7 @@ type
   private
     FPoints: TArrayOfFloatPoint;
     FPointCount: Integer;
-    function GetPoints: PListOfPoints;
+    function GetPoints: PArrayOfFloatPoint;
     procedure ConstructPoints(const S: WideString);
   protected
     procedure Assign(SVG: TSVGObject); override;
@@ -382,7 +382,7 @@ type
     procedure Clear; override;
     procedure ReadIn(const Node: PXMLNode); override;
 
-    property Points: PListOfPoints read GetPoints;
+    property Points: PArrayOfFloatPoint read GetPoints;
   end;
 
   TSVGPolygon = class(TSVGPolyLine)
@@ -939,27 +939,25 @@ begin
   CalcMatrix;
 end;
 
-function TSVGMatrix.Transform(P: TFPoint): TFPoint;
+function TSVGMatrix.Transform(P: TFloatPoint): TFloatPoint;
 var
-  TGP: TFloatMatrix;
+  TGP: TAffineTransformation;
   Point: TFloatPoint;
 begin
-  {$IFDEF GpMatrix}
   if FCalculatedMatrix[2, 2] = 1 then
   begin
-    TGP := GetGPMatrix(FCalculatedMatrix);
+    TGP := GetSVGTransformation(FCalculatedMatrix);
     Point.X := P.X;
     Point.Y := P.Y;
-    TGP.TransformPoints(PGPPointF(@Point));
+    P := TGP.Transform(Point);
     TGP.Free;
   end;
-  {$ENDIF}
   Result := P;
 end;
 
-function TSVGMatrix.Transform(X, Y: TFloat): TFPoint;
+function TSVGMatrix.Transform(X, Y: TFloat): TFloatPoint;
 var
-  P: TFPoint;
+  P: TFloatPoint;
 begin
   P.X := X;
   P.Y := Y;
@@ -1062,6 +1060,7 @@ var
 
   TGP: TFloatMatrix;
   }
+  TGP : TTransformation;
   Brush, StrokeBrush : TCustomPolygonFiller;
   ClipRoot: TSVGBasic;
 begin
@@ -1090,8 +1089,9 @@ begin
       end;
       Graphics.ResetTransform;
     end;
-
-    TGP := GetGPMatrix(Matrix);
+    }
+    TGP := GetSVGTransformation({PureMatrix}Matrix);
+    {
     Graphics.SetTransform(TGP);
     TGP.Free;
     }
@@ -1105,11 +1105,12 @@ begin
         }
         if Assigned(Brush) {and (Brush.GetLastStatus = OK)} then
           //Graphics.FillPath(Brush, FPath);
-          PolyPolygonFS( Graphics, self.FPath.Path, Brush);
+          PolyPolygonFS( Graphics, self.FPath.Path, Brush, pfAlternate, TGP);
 
 
         if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
-          PolyPolylineFS( Graphics, self.FPath.Path, StrokeBrush, True, GetStrokeWidth() );
+          PolyPolylineFS( Graphics, self.FPath.Path, StrokeBrush, True, GetStrokeWidth(),
+          jsMiter,esButt, 4.0, TGP  );
         //PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
@@ -1121,11 +1122,13 @@ begin
       end;}
     finally
       Brush.Free;
+      TGP.Free;
     end;
 
   finally
     //Graphics.ResetTransform;
     //Graphics.ResetClip;
+
   end;
 end;
 { $ELSE
@@ -3004,7 +3007,7 @@ begin
   FPointCount := 0;
 end;
 
-function TSVGPolyLine.GetPoints: PListOfPoints;
+function TSVGPolyLine.GetPoints: PArrayOfFloatPoint;
 begin
   Result := @FPoints;
 end;

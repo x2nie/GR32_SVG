@@ -7,7 +7,7 @@ uses
   Dialogs, StdCtrls, Graphics,
   SVG, ActnList, ImgList, //Slider, AngleChooser,Printers, ShellDropper
   ComCtrls, ToolWin, Classes,
-  ExtCtrls, StdActns, GR32, GR32_Image;
+  ExtCtrls, StdActns, GR32, GR32_Image, GR32_RangeBars;
 
 type
   TForm1 = class(TForm)
@@ -26,6 +26,7 @@ type
     ToolButton3: TToolButton;
     PrintDlg1: TPrintDlg;
     imgView1: TImgView32;
+    gau1: TGaugeBar;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1Paint(Sender: TObject);
@@ -36,6 +37,8 @@ type
     procedure Slider2Change(Sender: TObject);
     procedure Slider1Change(Sender: TObject);
     procedure PrintDlg1Accept(Sender: TObject);
+    procedure gau1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
 //    procedure ShellDropper1DragEnter(Sender: TObject; const DropRec: TDropRec;
   //    var Accept: Boolean);
     //procedure ShellDropper1Drop(Sender: TObject; const DropRec: TDropRec);
@@ -59,7 +62,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   //Panel1.DoubleBuffered := True;
   SVG := TSVG.Create;
-  imgView1.Bitmap.SetSize( imgView1.Width - 100, imgView1.Height - 100);
+  imgView1.Bitmap.SetSize( imgView1.Height - 100, imgView1.Height - 100);
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -193,7 +196,10 @@ begin
 end;
 
 procedure TForm1.LoadFile(const S: AnsiString);
+var
+  W, H: Integer;
 begin
+
 {  AngleChooser1.Angle := 0;
   Slider1.Percent := 25;
   Label1.Caption := 'Zoom: ' + FloatToStr(Slider1.Percent * 2) + '%';
@@ -203,11 +209,25 @@ begin
   SVG.LoadFromFile(S);
   Caption := ExtractFileName(S) + ' - SVG-Viewer';
 
-  imgView1.BeginUpdate;
-  imgView1.Bitmap.Clear(clWhite32);
-  SVG.PaintTo( imgView1.Bitmap, FloatRect( imgView1.Bitmap.BoundsRect), nil, 0  );
-  imgView1.EndUpdate;
-  imgView1.Invalidate;
+  if SVG.Count > 0 then
+  begin
+    imgView1.BeginUpdate;
+
+
+      W := Round(SVG.Width * {Slider1.Percent}50 * 2 / 50);
+      H := Round(SVG.Height * {Slider1.Percent}50 * 2 / 50);
+      (*
+      SVG.PaintTo(imgView1.Bitmap,
+        FloatRect( (imgView1.Bitmap.Width - W) / 2, (imgView1.Bitmap.Height - H) / 2, W, H), nil, 0);
+      *)
+    imgView1.Bitmap.SetSize(W, H);
+    imgView1.Bitmap.Clear(clWhite32);
+
+    SVG.PaintTo( imgView1.Bitmap, FloatRect( imgView1.Bitmap.BoundsRect), nil, 0  );
+
+    imgView1.EndUpdate;
+    imgView1.Invalidate;
+  end;
 end;
 
 procedure TForm1.Action1Execute(Sender: TObject);
@@ -246,6 +266,34 @@ begin
     Slider1.Percent := 0.1;
   Label1.Caption := 'Zoom: ' + FloatToStr(Slider1.Percent * 2) + '%';
   PaintBox1.Invalidate;}
+end;
+
+procedure TForm1.gau1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  W,H : Integer;
+begin
+  if SVG.Count > 0 then
+  begin
+    imgView1.BeginUpdate;
+
+
+      W := Round(SVG.Width * gau1.Position * 2 / 50);
+      H := Round(SVG.Height * gau1.Position * 2 / 50);
+      (*
+      SVG.PaintTo(imgView1.Bitmap,
+        FloatRect( (imgView1.Bitmap.Width - W) / 2, (imgView1.Bitmap.Height - H) / 2, W, H), nil, 0);
+      *)
+    imgView1.Bitmap.SetSize(W, H);
+    imgView1.Bitmap.Clear(clWhite32);
+
+    SVG.PaintTo( imgView1.Bitmap, FloatRect( imgView1.Bitmap.BoundsRect), nil, 0  );
+
+    imgView1.EndUpdate;
+    imgView1.Invalidate;
+  end;
+
+
 end;
 
 end.

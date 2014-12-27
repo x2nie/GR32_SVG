@@ -21,7 +21,7 @@ interface
 
 uses
   Windows, Math,
-  GR32, GR32_Blend, GR32_Polygons;
+  GR32, GR32_Blend, GR32_Transforms, GR32_Polygons;
   //GDIPAPI;
 
 const
@@ -35,17 +35,17 @@ const
 type
   TFloat = Single;
 
-  TFPoint = record
+  {TFPoint = record
     X, Y: TFloat;
-  end;
+  end;}
 
   TFRect = record
     Left, Top,
     Width, Height: TFloat;
   end;
 
-  TListOfPoints = array of TFPoint;
-  PListOfPoints = ^TListOfPoints;
+  {TListOfPoints = array of TFPoint;
+  PListOfPoints = ^TListOfPoints;}
 
   TSingleA = array of Single;
   PSingleA = ^TSingleA;
@@ -64,10 +64,10 @@ type
   TGradientUnits = (guObjectBoundingBox, guUserSpaceOnUse);
 
   TBounds = record
-    TopLeft: TFPoint;
-    TopRight: TFPoint;
-    BottomLeft: TFPoint;
-    BottomRight: TFPoint;
+    TopLeft: TFloatPoint;
+    TopRight: TFloatPoint;
+    BottomLeft: TFloatPoint;
+    BottomRight: TFloatPoint;
   end;
 
   //I don't know how to fill polygon with single color
@@ -84,10 +84,12 @@ type
   end;
 
 
+function GetSVGTransformation(M: TFloatMatrix) : TAffineTransformation;
 
 //function ToGPPoint(const Point: TFPoint): TGPPointF;
 
 function Intersect(const Bounds: TBounds; const Rect: TRect): Boolean;
+
 
 implementation
 
@@ -95,6 +97,18 @@ implementation
 begin
   Result := MakePoint(Point.X, Point.Y);
 end;}
+type
+  TAffineTransformationAccess = class(TAffineTransformation);
+
+function GetSVGTransformation(M: TFloatMatrix) : TAffineTransformation;
+begin
+  Result := TAffineTransformation.Create;
+  with TAffineTransformationAccess(Result) do
+  begin
+    FMatrix := M;
+    Changed;
+  end;
+end;  
 
 function Intersect(const Bounds: TBounds; const Rect: TRect): Boolean;
 var

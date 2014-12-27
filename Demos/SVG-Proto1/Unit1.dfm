@@ -65,6 +65,20 @@ object Form1: TForm1
       Height = 13
       Caption = 'Opacity: 100%'
     end
+    object gau1: TGaugeBar
+      Left = 32
+      Top = 8
+      Width = 129
+      Height = 16
+      Backgnd = bgPattern
+      Max = 200
+      Min = 5
+      ShowArrows = False
+      ShowHandleGrip = True
+      Style = rbsMac
+      Position = 50
+      OnMouseUp = gau1MouseUp
+    end
   end
   object Panel1: TPanel
     Left = 0
