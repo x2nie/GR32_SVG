@@ -1109,7 +1109,7 @@ begin
 
 
         if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
-          PolyPolylineFS( Graphics, self.FPath.Path, StrokeBrush);
+          PolyPolylineFS( Graphics, self.FPath.Path, StrokeBrush, True, GetStrokeWidth() );
         //PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
