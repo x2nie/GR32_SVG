@@ -109,9 +109,7 @@ type
   public
     procedure Clear; override;
     procedure ReadIn(const Node: PXMLNode); override;
-    {$IFDEF GPPen}
-    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; override;
-    {$ENDIF}
+    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller; override;
 
     property CX: TFloat read FCX write FCX;
     property CY: TFloat read FCY write FCY;
@@ -268,25 +266,17 @@ end;
 
 function TSVGLinearGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller;
 var
-  Brush: TLinearGradientSampler;
   Sampler: TLinearGradientSampler;
 
   //TGP: TGPMatrix;
   Colors: TColors;
   Gradient : TColor32Gradient;
-  FGradientLUT : TColor32LookupTable;
+  GradientLUT : TColor32LookupTable;
   LinearGradFiller: TCustomLinearGradientPolygonFiller;
 
   i : Integer;
   R : TFloatRect;
 begin
-  //Brush := TLinearGradientSampler.Create;
-  {x2nie
-  if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
-    Brush := TGPLinearGradientBrush.Create(MakePoint(DestObject.X, DestObject.Y),
-      MakePoint(DestObject.X + DestObject.Width, DestObject.Y + DestObject.Height), 0, 0)
-  else
-    Brush := TGPLinearGradientBrush.Create(MakePoint(FX1, FY1), MakePoint(FX2, FY2), 0, 0);}
 
   if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
     R := FloatRect(DestObject.X, DestObject.Y, DestObject.X + DestObject.Width, DestObject.Y + DestObject.Height)
@@ -296,19 +286,18 @@ begin
 
   Colors := GetColors(Alpha);
 
-  FGradientLUT := TColor32LookupTable.Create;
+  GradientLUT := TColor32LookupTable.Create;
   Gradient := TColor32Gradient.Create;
   for i := 0 to Colors.Count -1 do
   begin
     Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
   end;
-  Gradient.FillColorLookUpTable(FGradientLUT);
+  Gradient.FillColorLookUpTable(GradientLUT);
 
-  LinearGradFiller := TLinearGradientPolygonFiller.Create(FGradientLUT);
-
-    LinearGradFiller.StartPoint := R.TopLeft;
-    LinearGradFiller.EndPoint := R.BottomRight;
-    LinearGradFiller.WrapMode := wmClamp;
+  LinearGradFiller := TLinearGradientPolygonFiller.Create(GradientLUT);
+  LinearGradFiller.StartPoint := R.TopLeft;
+  LinearGradFiller.EndPoint := R.BottomRight;
+  LinearGradFiller.WrapMode := wmClamp;
 
 
   //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
@@ -364,9 +353,9 @@ begin
   LoadLength(Node, 'fx', FFX);
   LoadLength(Node, 'fy', FFY);
 end;
-{$IFDEF GPPen}
-function TSVGRadialGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush;
-var
+
+function TSVGRadialGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller;
+{var
   Brush: TGPPathGradientBrush;
   Path: TArrayOfArrayOfFloatPoint;
   TGP: TGPMatrix;
@@ -396,9 +385,56 @@ begin
     TGP.Free;
   end;
 
+  Result := Brush;}
+var
+  Sampler: TLinearGradientSampler;
+
+  //TGP: TGPMatrix;
+  Colors: TColors;
+  Gradient : TColor32Gradient;
+  GradientLUT : TColor32LookupTable;
+  RadialGradFiller : TRadialGradientPolygonFiller;
+  i : Integer;
+  R : TFloatRect;
+begin
+
+  if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
+    R := FloatRect(DestObject.X, DestObject.Y, DestObject.X + DestObject.Width, DestObject.Y + DestObject.Height)
+  else
+    R := FloatRect(FCX - FR, FCY - FR, FCX + FR, FCY + FR);
+
+
+  Colors := GetColors(Alpha);
+
+  GradientLUT := TColor32LookupTable.Create;
+  Gradient := TColor32Gradient.Create;
+  for i := 0 to Colors.Count -1 do
+  begin
+    Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
+  end;
+  Gradient.FillColorLookUpTable(GradientLUT);
+
+  RadialGradFiller := TRadialGradientPolygonFiller.Create(GradientLUT);
+  RadialGradFiller.EllipseBounds := R;
+  RadialGradFiller.WrapMode := wmClamp;
+
+
+  //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
+    //PSingle(Colors.Positions), Colors.Count);
+
+  Finalize(Colors);
+
+  {if PureMatrix.Cells[2, 2] = 1 then
+  begin
+    TGP := GetGPMatrix(PureMatrix);
+    Brush.SetTransform(TGP);
+    TGP.Free;
+  end;
+
   Result := Brush;
+  }
+  Result := RadialGradFiller;
 end;
-{$ENDIF}
 
 function TSVGRadialGradient.New(Parent: TSVGObject): TSVGObject;
 begin

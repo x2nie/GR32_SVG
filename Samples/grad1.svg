@@ -19,6 +19,17 @@
   <defs
      id="defs3">
     <linearGradient
+       id="linearGradient4428">
+      <stop
+         style="stop-color:#1a1a1a;stop-opacity:1;"
+         offset="0"
+         id="stop4430" />
+      <stop
+         style="stop-color:#e6fd0d;stop-opacity:0.31304348;"
+         offset="1"
+         id="stop4432" />
+    </linearGradient>
+    <linearGradient
        id="linearGradient4354">
       <stop
          style="stop-color:#8ad672;stop-opacity:1;"
@@ -41,6 +52,17 @@
        y1="17.165361"
        x2="200.75002"
        y2="57.998692"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4428"
+       id="radialGradient4434"
+       cx="128.55832"
+       cy="103.03163"
+       fx="128.55832"
+       fy="103.03163"
+       r="85.525017"
+       gradientTransform="matrix(1,0,0,1.0416523,0,-4.2915029)"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
@@ -84,5 +106,22 @@
        height="45"
        x="8.333333"
        y="13.832026" />
+    <path
+       sodipodi:type="star"
+       style="fill:url(#radialGradient4434);stroke:#676b64;stroke-width:1.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:0;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1.0"
+       id="path4426"
+       sodipodi:sides="5"
+       sodipodi:cx="136.66667"
+       sodipodi:cy="103.83203"
+       sodipodi:r1="92.919469"
+       sodipodi:r2="46.459735"
+       sodipodi:arg1="-0.60043977"
+       sodipodi:arg2="0.027878758"
+       inkscape:flatsided="false"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 213.33334,51.33203 -30.22499,53.79507 27.18009,55.39587 -60.50219,-12.12208 -44.28549,42.96807 -7.167423,-61.28693 -54.55003,-28.84014 56.072479,-25.75533 10.571724,-60.792256 41.82212,45.369262 z"
+       inkscape:transform-center-x="8.1083477"
+       inkscape:transform-center-y="-0.80039845" />
   </g>
 </svg>
