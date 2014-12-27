@@ -192,9 +192,10 @@ type
     procedure ConstructPath; virtual;
     function GetClipPath: TFlattenedPath;
     procedure CalcClipPath;
+    function GetBrush(AURI: WideString): TCustomPolygonFiller;
     function GetFillBrush: {TGPBrush} TCustomPolygonFiller;
+    function GetStrokeBrush: TCustomPolygonFiller;
     {$IFDEF GPPen}
-    function GetStrokeBrush: TGPBrush;
     function GetStrokePen(const StrokeBrush: TGPBrush): TGPPen;
 
     procedure BeforePaint(const Graphics: TBitmap32; const Brush: TGPBrush;
@@ -1061,7 +1062,7 @@ var
 
   TGP: TFloatMatrix;
   }
-  Brush : TCustomPolygonFiller;
+  Brush, StrokeBrush : TCustomPolygonFiller;
   ClipRoot: TSVGBasic;
 begin
   if (FPath = nil) {or (FPath.GetLastStatus <> OK)} then
@@ -1096,8 +1097,8 @@ begin
     }
     Brush := GetFillBrush;
     try
-      {StrokeBrush := GetStrokeBrush;
-      Pen := GetStrokePen(StrokeBrush);
+      StrokeBrush := GetStrokeBrush;
+      {Pen := GetStrokePen(StrokeBrush);
 
       try
         BeforePaint(Graphics, Brush, Pen);
@@ -1107,6 +1108,9 @@ begin
           PolyPolygonFS( Graphics, self.FPath.Path, Brush);
 
 
+        if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
+          PolyPolylineFS( Graphics, self.FPath.Path, StrokeBrush);
+        //PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
 
@@ -1648,7 +1652,7 @@ begin
   SL.Free;
 end;
 
-function TSVGBasic.GetFillBrush: {TGPBrush} TCustomPolygonFiller;
+function TSVGBasic.GetBrush(AURI: WideString): TCustomPolygonFiller;
 var
   Color: Integer;
   C32 : TColor32;
@@ -1658,9 +1662,9 @@ begin
   Result := nil;
   Opacity := Round(255 * FillOpacity);
 
-  if FFillURI <> '' then
+  if AURI <> '' then
   begin
-    Filler := GetRoot.FindByID(FFillURI);
+    Filler := GetRoot.FindByID(AURI);
     if Assigned(Filler) and (Filler is TSVGFiller) then
       Result := TSVGFiller(Filler).GetBrush(Opacity, Self);
   end
@@ -1670,7 +1674,7 @@ begin
     if Color >= 0 then
     begin
       C32 := Color32(Color);
-      //PColor32Entry(@C32)^.A := Opacity;
+      PColor32Entry(@C32)^.A := Opacity;
 
       //Result := TGPSolidBrush.Create(ConvertColor(Color, Opacity));
       Result := TSolidPoligonFiller.Create;
@@ -1678,6 +1682,12 @@ begin
     end;
   end;
 end;
+
+function TSVGBasic.GetFillBrush: {TGPBrush} TCustomPolygonFiller;
+begin
+  Result := GetBrush(FFillURI);
+end;
+
 
 function TSVGBasic.GetFillColor: Integer;
 var
@@ -1692,9 +1702,38 @@ begin
   else
     Result := 0;
 end;
-{$IFDEF GPPEN}
-function TSVGBasic.GetStrokeBrush: TGPBrush;
+
+function TSVGBasic.GetStrokeBrush: TCustomPolygonFiller;
 var
+  Color: Integer;
+  C32 : TColor32;
+  Opacity: Integer;
+  Filler: TSVGObject;
+begin
+  Result := nil;
+  Opacity := Round(255 * StrokeOpacity);
+
+  if FStrokeURI <> '' then
+  begin
+    Filler := GetRoot.FindByID(FStrokeURI);
+    if Assigned(Filler) and (Filler is TSVGFiller) then
+      Result := TSVGFiller(Filler).GetBrush(Opacity, Self);
+  end
+  else
+  begin
+    Color := StrokeColor;
+    if Color >= 0 then
+    begin
+      C32 := Color32(Color);
+      PColor32Entry(@C32)^.A := Opacity;
+
+      //Result := TGPSolidBrush.Create(ConvertColor(Color, Opacity));
+      Result := TSolidPoligonFiller.Create;
+      TSolidPoligonFiller(Result).Color := C32;
+    end;
+  end;
+end;
+{var
   Color: Integer;
   Opacity: Integer;
   Filler: TSVGObject;
@@ -1712,7 +1751,7 @@ begin
     if Color >= 0 then
       Result := TGPSolidBrush.Create(ConvertColor(Color, Opacity));
 end;
-{$ENDIF}
+{ $ENDIF}
 function TSVGBasic.GetStrokeColor: Integer;
 var
   SVG: TSVGObject;
@@ -4247,7 +4286,7 @@ begin
     ReadTextNodes(Node.childNodes[0]);
 end;
 {$ENDIF}
-procedure PatchINT3; 
+procedure PatchINT3;
 var 
   NOP: Byte;
   NTDLL: THandle;
@@ -4276,6 +4315,7 @@ begin
     else raise;
   end;
 end;
+
 
 initialization
   {$WARN SYMBOL_PLATFORM OFF}
