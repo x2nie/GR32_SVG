@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 334
-  Top = 237
+  Left = 249
+  Top = 96
   Width = 1049
   Height = 674
   Caption = 'SVG-Viewer'
@@ -76,13 +76,22 @@ object Form1: TForm1
     Color = clWhite
     ParentBackground = False
     TabOrder = 2
-    object PaintBox1: TPaintBox
+    object imgView1: TImgView32
       Left = 0
       Top = 0
       Width = 1041
       Height = 569
       Align = alClient
-      OnPaint = PaintBox1Paint
+      Bitmap.ResamplerClassName = 'TNearestResampler'
+      BitmapAlign = baCustom
+      Scale = 1.000000000000000000
+      ScaleMode = smScale
+      ScrollBars.ShowHandleGrip = True
+      ScrollBars.Style = rbsDefault
+      ScrollBars.Size = 16
+      ScrollBars.Visibility = svAuto
+      OverSize = 0
+      TabOrder = 0
     end
   end
   object ActionList1: TActionList

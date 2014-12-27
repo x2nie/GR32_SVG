@@ -192,8 +192,8 @@ type
     procedure ConstructPath; virtual;
     function GetClipPath: TFlattenedPath;
     procedure CalcClipPath;
+    function GetFillBrush: {TGPBrush} TCustomPolygonFiller;
     {$IFDEF GPPen}
-    function GetFillBrush: TGPBrush;
     function GetStrokeBrush: TGPBrush;
     function GetStrokePen(const StrokeBrush: TGPBrush): TGPPen;
 
@@ -1054,13 +1054,14 @@ begin
 end;
 
 procedure TSVGBasic.PaintToGraphics(Graphics: TBitmap32);
-{$IFDEF gpPen}
+
 var
-  Brush, StrokeBrush: TGPBrush;
+  {Brush, StrokeBrush: TGPBrush;
   Pen: TGPPen;
 
   TGP: TFloatMatrix;
-
+  }
+  Brush : TCustomPolygonFiller;
   ClipRoot: TSVGBasic;
 begin
   if (FPath = nil) {or (FPath.GetLastStatus <> OK)} then
@@ -1070,7 +1071,7 @@ begin
     CalcClipPath;
 
   try
-    if Assigned(FClipPath) then
+    {if Assigned(FClipPath) then
     begin
       if ClipURI <> '' then
       begin
@@ -1092,35 +1093,38 @@ begin
     TGP := GetGPMatrix(Matrix);
     Graphics.SetTransform(TGP);
     TGP.Free;
-
+    }
     Brush := GetFillBrush;
     try
-      StrokeBrush := GetStrokeBrush;
+      {StrokeBrush := GetStrokeBrush;
       Pen := GetStrokePen(StrokeBrush);
 
       try
         BeforePaint(Graphics, Brush, Pen);
-        if Assigned(Brush) and (Brush.GetLastStatus = OK) then
-          Graphics.FillPath(Brush, FPath);
+        }
+        if Assigned(Brush) {and (Brush.GetLastStatus = OK)} then
+          //Graphics.FillPath(Brush, FPath);
+          PolyPolygonFS( Graphics, self.FPath.Path, Brush);
 
-        if Assigned(Pen) and (Pen.GetLastStatus = OK) then
+
+        {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
 
         AfterPaint(Graphics, Brush, Pen);
       finally
         Pen.Free;
         StrokeBrush.Free;
-      end;
+      end;}
     finally
       Brush.Free;
     end;
 
   finally
-    Graphics.ResetTransform;
-    Graphics.ResetClip;
+    //Graphics.ResetTransform;
+    //Graphics.ResetClip;
   end;
 end;
-{$ELSE}
+{ $ELSE
 var Color : TColor32;
   Opacity : Byte;
 begin
@@ -1133,10 +1137,10 @@ begin
     Color := Color32(FillColor);
     PColor32Entry(@Color)^.A := Opacity;
 
-    PolyPolygonFS(Graphics, self.FPath.Path, Color);
+    PolyPolygonFS( Graphics, self.FPath.Path, Color);
   end;
 end;
-{$ENDIF}
+{ $ENDIF}
 
 procedure TSVGBasic.PaintToPath(Path: TFlattenedPath);
 var
@@ -1643,10 +1647,11 @@ begin
 
   SL.Free;
 end;
-{$IFDEF GPPEN}
-function TSVGBasic.GetFillBrush: TGPBrush;
+
+function TSVGBasic.GetFillBrush: {TGPBrush} TCustomPolygonFiller;
 var
   Color: Integer;
+  C32 : TColor32;
   Opacity: Integer;
   Filler: TSVGObject;
 begin
@@ -1659,11 +1664,21 @@ begin
     Filler := GetRoot.FindByID(FFillURI);
     if Assigned(Filler) and (Filler is TSVGFiller) then
       Result := TSVGFiller(Filler).GetBrush(Opacity, Self);
-  end else
+  end
+  else
+  begin
     if Color >= 0 then
-      Result := TGPSolidBrush.Create(ConvertColor(Color, Opacity));
+    begin
+      C32 := Color32(FillColor);
+      PColor32Entry(@C32)^.A := Opacity;
+
+      //Result := TGPSolidBrush.Create(ConvertColor(Color, Opacity));
+      Result := TSolidPoligonFiller.Create;
+      TSolidPoligonFiller(Result).Color := C32;
+    end;
+  end;
 end;
-{$ENDIF}
+
 function TSVGBasic.GetFillColor: Integer;
 var
   SVG: TSVGObject;

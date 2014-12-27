@@ -26,7 +26,7 @@ uses
   OXmlCDOM, OXmlPDOM, OXmlSAX, OXmlSeq, OXmlSerialize,
 
   //GDIPOBJ, GDIPAPI,
-  GR32, GR32_Paths, GR32_Transforms,
+  GR32, GR32_Paths, GR32_Transforms, GR32_Polygons,
   SVGTypes, SVG;
 
 type
@@ -62,9 +62,7 @@ type
     function New(Parent: TSVGObject): TSVGObject; override;
   public
     procedure ReadIn(const Node: PXMLNode); override;
-    {$IFDEF GPPen}
-    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; virtual; abstract;
-    {$ENDIF}
+    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): {TGPBrush} TCustomPolygonFiller; virtual; abstract;
     procedure PaintToGraphics(Graphics: TBitmap32); override;
     procedure PaintToPath(Path: TFlattenedPath); override;
   end;
@@ -90,9 +88,7 @@ type
     procedure Assign(SVG: TSVGObject); override;
   public
     procedure ReadIn(const Node: PXMLNode); override;
-    {$IFDEF GPPen}
-    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush; override;
-    {$ENDIF}
+    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller; override;
 
     property X1: TFloat read FX1 write FX1;
     property Y1: TFloat read FY1 write FY1;
@@ -130,6 +126,7 @@ implementation
 uses
   SysUtils,
   //Matrix,
+  GR32_ColorGradients,
   SVGParse, SVGStyle, SVGProperties, SVGColor;
 
 // TSVGStop
@@ -268,27 +265,58 @@ begin
   end;
 end;
 
-{$IFDEF GPPen}
-function TSVGLinearGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TGPBrush;
+
+function TSVGLinearGradient.GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller;
 var
-  Brush: TGPLinearGradientBrush;
-  TGP: TGPMatrix;
+  Brush: TLinearGradientSampler;
+  Sampler: TLinearGradientSampler;
+
+  //TGP: TGPMatrix;
   Colors: TColors;
+  Gradient : TColor32Gradient;
+  FGradientLUT : TColor32LookupTable;
+  LinearGradFiller: TCustomLinearGradientPolygonFiller;
+
+  i : Integer;
+  R : TFloatRect;
 begin
+  //Brush := TLinearGradientSampler.Create;
+  {x2nie
   if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
     Brush := TGPLinearGradientBrush.Create(MakePoint(DestObject.X, DestObject.Y),
       MakePoint(DestObject.X + DestObject.Width, DestObject.Y + DestObject.Height), 0, 0)
   else
-    Brush := TGPLinearGradientBrush.Create(MakePoint(FX1, FY1), MakePoint(FX2, FY2), 0, 0);
+    Brush := TGPLinearGradientBrush.Create(MakePoint(FX1, FY1), MakePoint(FX2, FY2), 0, 0);}
+
+  if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
+    R := FloatRect(DestObject.X, DestObject.Y, DestObject.X + DestObject.Width, DestObject.Y + DestObject.Height)
+  else
+    R := FloatRect(FX1, FY1, FX2, FY2);
+
 
   Colors := GetColors(Alpha);
 
-  Brush.SetInterpolationColors(PGPColor(Colors.Colors),
-    PSingle(Colors.Positions), Colors.Count);
+  FGradientLUT := TColor32LookupTable.Create;
+  Gradient := TColor32Gradient.Create;
+  for i := 0 to Colors.Count -1 do
+  begin
+    Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
+  end;
+  Gradient.FillColorLookUpTable(FGradientLUT);
+
+  LinearGradFiller := TLinearGradientPolygonFiller.Create(FGradientLUT);
+
+    LinearGradFiller.StartPoint := R.TopLeft;
+    LinearGradFiller.EndPoint := R.BottomRight;
+    LinearGradFiller.WrapMode := wmClamp;
+
+
+  //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
+    //PSingle(Colors.Positions), Colors.Count);
 
   Finalize(Colors);
 
-  if PureMatrix.Cells[2, 2] = 1 then
+  {if PureMatrix.Cells[2, 2] = 1 then
   begin
     TGP := GetGPMatrix(PureMatrix);
     Brush.SetTransform(TGP);
@@ -296,8 +324,10 @@ begin
   end;
 
   Result := Brush;
+  }
+  Result := LinearGradFiller;
 end;
-{$ENDIF}
+
 // TSVGRadialGradient
 
 procedure TSVGRadialGradient.Assign(SVG: TSVGObject);

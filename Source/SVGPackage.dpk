@@ -23,15 +23,14 @@ package SVGPackage;
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
 {$DESCRIPTION 'MWK - SVG'}
-{$IMPLICITBUILD OFF}
+{$IMPLICITBUILD ON}
 
 requires
   rtl,
   vcl,
   OXML_R7,
-  ListPackage,
-  GDIPlusPackage,
-  GR32_D7;
+  GR32_D7,
+  ListPackage;
 
 contains
   SVG in 'SVG.pas',

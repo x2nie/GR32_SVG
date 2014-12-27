@@ -94,7 +94,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=D:\v\_.Ext\SVG\mw\Lists-v1.0;D:\v\_.Ext\SVG\mw\SVGlib-v0.69
+SearchPath=
 Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;GR32_D7;GR32_DSGN_D7;ESSSVO_d7;SynEdit_R7;CrossFPC;wd7;TBx2_D7;dockpro;OXml_R7;ListPackage;DirectX9;GDIPlusPackage
 Conditionals=
 DebugSourceDirs=
@@ -135,5 +135,23 @@ ProductName=
 ProductVersion=1.0.0.0
 Comments=
 [Excluded Packages]
-c:\program files\borland\delphi7\Bin\dclIntraweb_50_70.bpl=Intraweb 5.0 Design Package for Delphi 7
-c:\program files\borland\delphi7\Bin\dclofficexp70.bpl=Microsoft Office XP Sample Automation Server Wrapper Components
+C:\Program Files (x86)\Borland\Delphi7\Projects\Bpl\mg_D7.bpl=miniGlue
+c:\program files (x86)\borland\delphi7\Projects\Bpl\Touch_D7.bpl=GR32 Touchable
+c:\program files (x86)\borland\delphi7\Projects\Bpl\dclrxdb70.bpl=RX Library Database Components
+C:\Program Files (x86)\Borland\Delphi7\Projects\Bpl\dclrx70.bpl=RX Library Controls and Tools
+c:\program files (x86)\borland\delphi7\Projects\Bpl\PosView7.bpl=POS View Control
+c:\program files (x86)\borland\delphi7\Projects\Bpl\D7DIBInstall.bpl=Droopy eyes - DIBControls
+C:\Program Files (x86)\Borland\Delphi7\Projects\Bpl\D7DIBRuntime.bpl=Droopy eyes - DIBControls
+c:\program files (x86)\borland\delphi7\Projects\Bpl\ascure.bpl=lili
+c:\program files (x86)\borland\delphi7\Projects\Bpl\Artisoft70_60.bpl=Artisoft nggih meniko 
+c:\program files (x86)\borland\delphi7\Projects\Bpl\ColorPicker.bpl=Color Picker 2000
+c:\program files (x86)\borland\delphi7\Projects\Bpl\MirrorKOLPackageD7.bpl=_KOL_ mirror controls for Delphi 7
+c:\program files (x86)\borland\delphi7\Projects\Bpl\myaddicon.bpl=Borland ToolsApi Example
+c:\program files (x86)\borland\delphi7\Projects\Bpl\ActionSv.bpl=Borland ToolsApi Demo -Action Service-
+c:\program files (x86)\borland\delphi7\Projects\Bpl\VirtualTreesD.bpl=Virtual Treeview design time package
+C:\Program Files (x86)\Borland\delphi7\bin\dclRave70.bpl=Rave Reports BE 5.0 Package
+C:\Program Files (x86)\Borland\delphi7\Projects\Bpl\VT_DB7.bpl=Virtual Tree DB delphi7
+c:\program files (x86)\borland\delphi7\Projects\Bpl\TB97_d7.bpl=Toolbar97 Components
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;

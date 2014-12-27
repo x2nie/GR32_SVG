@@ -20,7 +20,7 @@ unit SVGColor;
 interface
 
 uses
-  Graphics;
+  Graphics, GR32;
 
 type
   TColorRef = record
@@ -33,7 +33,7 @@ var
 
 function GetColor(const S: WideString): TColor;
 
-function ConvertColor(Color: TColor; Alpha: Byte): Cardinal;
+function ConvertColor(Color: TColor; Alpha: Byte): TColor32;
 
 implementation
 
@@ -209,7 +209,7 @@ begin
   Result := DecodeRGB(Color);
 end;
 
-function ConvertColor(Color: TColor; Alpha: Byte): Cardinal;
+function ConvertColor(Color: TColor; Alpha: Byte): TColor32;
 var
   R, G, B: Byte;
 begin
@@ -217,7 +217,8 @@ begin
   G := (Color and $0000FF00) shr 8;
   B := (Color and $00FF0000) shr 16;
   //Result := MakeColor(Alpha, R, G, B);
-  Result := Alpha shl 24 or R shl 16 or G shl 8 or B;
+  //Result := Alpha shl 24 or R shl 16 or G shl 8 or B;
+  Result := Color32(R,G,B,Alpha)
 end;
 
 

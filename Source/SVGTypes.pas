@@ -20,7 +20,8 @@ unit SVGTypes;
 interface
 
 uses
-  Windows, Math;
+  Windows, Math,
+  GR32, GR32_Blend, GR32_Polygons;
   //GDIPAPI;
 
 const
@@ -69,6 +70,21 @@ type
     BottomRight: TFPoint;
   end;
 
+  //I don't know how to fill polygon with single color
+  TSolidPoligonFiller = class(TCustomPolygonFiller)
+  private
+    FColor: TColor32;
+  protected
+    function GetFillLine: TFillLineEvent; override;
+    procedure FillLineBlend(Dst: PColor32; DstX, DstY, Length: Integer; AlphaValues: PColor32);
+  public
+    property Color : TColor32 read FColor write FColor;
+  published
+
+  end;
+
+
+
 //function ToGPPoint(const Point: TFPoint): TGPPointF;
 
 function Intersect(const Bounds: TBounds; const Rect: TRect): Boolean;
@@ -104,6 +120,29 @@ begin
 
   DeleteObject(R1);
   DeleteObject(R2);
+end;
+
+{ TSolidPoligonFiller }
+
+procedure TSolidPoligonFiller.FillLineBlend(Dst: PColor32; DstX, DstY,
+  Length: Integer; AlphaValues: PColor32);
+var
+  X: Integer;
+  BlendMemEx: TBlendMemEx;
+begin
+  BlendMemEx := BLEND_MEM_EX[cmBlend]^;
+  for X := DstX to DstX + Length - 1 do
+  begin
+    BlendMemEx(FColor, Dst^, AlphaValues^ shr 1);
+    EMMS;
+    Inc(Dst);
+    Inc(AlphaValues);
+  end;
+end;
+
+function TSolidPoligonFiller.GetFillLine: TFillLineEvent;
+begin
+  Result := FillLineBlend;
 end;
 
 end.

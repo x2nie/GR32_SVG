@@ -7,7 +7,7 @@ uses
   Dialogs, StdCtrls, Graphics,
   SVG, ActnList, ImgList, //Slider, AngleChooser,Printers, ShellDropper
   ComCtrls, ToolWin, Classes,
-  ExtCtrls, StdActns;
+  ExtCtrls, StdActns, GR32, GR32_Image;
 
 type
   TForm1 = class(TForm)
@@ -21,11 +21,11 @@ type
     Label2: TLabel;
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
-    PaintBox1: TPaintBox;
     ToolButton2: TToolButton;
     PrintDialog1: TPrintDialog;
     ToolButton3: TToolButton;
     PrintDlg1: TPrintDlg;
+    imgView1: TImgView32;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1Paint(Sender: TObject);
@@ -51,16 +51,15 @@ var
 
 implementation
 
-uses
-  ShellApi,
-  GDIPApi, GDIPObj;
 
 {$R *.dfm}
 
 procedure TForm1.FormCreate(Sender: TObject);
+
 begin
-  Panel1.DoubleBuffered := True;
+  //Panel1.DoubleBuffered := True;
   SVG := TSVG.Create;
+  imgView1.Bitmap.SetSize( imgView1.Width - 100, imgView1.Height - 100);
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -76,8 +75,8 @@ begin
   begin
     W := Round(SVG.Width * {Slider1.Percent}100 * 2 / 50);
     H := Round(SVG.Height * {Slider1.Percent}100 * 2 / 50);
-    SVG.PaintTo(PaintBox1.Canvas.Handle,
-      MakeRect((PaintBox1.Width - W) / 2, (PaintBox1.Height - H) / 2, W, H), nil, 0);
+    //SVG.PaintTo(PaintBox1.Canvas.Handle,
+      //MakeRect((PaintBox1.Width - W) / 2, (PaintBox1.Height - H) / 2, W, H), nil, 0);
   end;
 end;
 
@@ -147,8 +146,8 @@ end;
 procedure TForm1.PrintDlg1Accept(Sender: TObject);
 var
   R: TRect;
-  Bounds: TGPRectF;
-  Graphics: TGPGraphics;
+  //Bounds: TGPRectF;
+  //Graphics: TGPGraphics;
   Caps: TDeviceCaps;
 begin
   Caps := GetPrinterCaps;
@@ -189,8 +188,8 @@ begin
       Slider1.Percent := Slider1.Percent + 5;
   end;
 
-  Label1.Caption := 'Zoom: ' + FloatToStr(Slider1.Percent * 2) + '%';}
-  PaintBox1.Invalidate;
+  Label1.Caption := 'Zoom: ' + FloatToStr(Slider1.Percent * 2) + '%';
+  PaintBox1.Invalidate;}
 end;
 
 procedure TForm1.LoadFile(const S: AnsiString);
@@ -203,7 +202,12 @@ begin
  } SetCurrentDir(ExtractFilePath(S));
   SVG.LoadFromFile(S);
   Caption := ExtractFileName(S) + ' - SVG-Viewer';
-  PaintBox1.Invalidate;
+
+  imgView1.BeginUpdate;
+  imgView1.Bitmap.Clear(clWhite32);
+  SVG.PaintTo( imgView1.Bitmap, FloatRect( imgView1.Bitmap.BoundsRect), nil, 0  );
+  imgView1.EndUpdate;
+  imgView1.Invalidate;
 end;
 
 procedure TForm1.Action1Execute(Sender: TObject);
@@ -215,14 +219,14 @@ end;
 procedure TForm1.AngleChooser1Change(Sender: TObject);
 begin
 //  SVG.Angle := AngleChooser1.Angle / 180 * Pi;
-  PaintBox1.Invalidate;
+//  PaintBox1.Invalidate;
 end;
 
 procedure TForm1.Slider2Change(Sender: TObject);
 begin
 //  Label2.Caption := 'Opacity: ' + Slider2.PercentString + '%';
 //  SVG.SVGOpacity := Slider2.Percent / 100;
-  PaintBox1.Invalidate;
+//  PaintBox1.Invalidate;
 end;
 
 {procedure TForm1.ShellDropper1DragEnter(Sender: TObject;
