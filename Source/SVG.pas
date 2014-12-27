@@ -1656,7 +1656,6 @@ var
   Filler: TSVGObject;
 begin
   Result := nil;
-  Color := FillColor;
   Opacity := Round(255 * FillOpacity);
 
   if FFillURI <> '' then
@@ -1667,10 +1666,11 @@ begin
   end
   else
   begin
+    Color := FillColor;
     if Color >= 0 then
     begin
-      C32 := Color32(FillColor);
-      PColor32Entry(@C32)^.A := Opacity;
+      C32 := Color32(Color);
+      //PColor32Entry(@C32)^.A := Opacity;
 
       //Result := TGPSolidBrush.Create(ConvertColor(Color, Opacity));
       Result := TSolidPoligonFiller.Create;

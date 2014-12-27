@@ -133,11 +133,11 @@ begin
   BlendMemEx := BLEND_MEM_EX[cmBlend]^;
   for X := DstX to DstX + Length - 1 do
   begin
-    BlendMemEx(FColor, Dst^, AlphaValues^ shr 1);
-    EMMS;
+    BlendMemEx(FColor, Dst^, AlphaValues^);
     Inc(Dst);
     Inc(AlphaValues);
   end;
+  EMMS;
 end;
 
 function TSolidPoligonFiller.GetFillLine: TFillLineEvent;
