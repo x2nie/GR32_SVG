@@ -415,7 +415,12 @@ var
   R : TFloatRect;
   F : TFloatPoint;
   T : TAffineTransformation;
+  M : TFloatMatrix;
 begin
+  if not Assigned(DestObject) then
+    M := IdentityMatrix
+  else
+    M := DestObject.Matrix;
 
   if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
     R := FloatRect(DestObject.X, DestObject.Y, DestObject.X + DestObject.Width, DestObject.Y + DestObject.Height)
@@ -438,14 +443,16 @@ begin
   if PureMatrix[2, 2] > 0 then
   //if PureMatrix <> IdentityMatrix then
   begin
-    T := SVGTypes.GetSVGTransformation(PureMatrix);
+    M := Mult(M,PureMatrix);
+  end;
+    T := SVGTypes.GetSVGTransformation(M);
     T.SrcRect := FloatRect(-1,-1, 1, 1);
     R.TopLeft := T.Transform(R.TopLeft);
     R.BottomRight := T.Transform(R.BottomRight);
     F := T.Transform(F);
 
-    T.Free;                                             
-  end;
+    T.Free;
+
 
   RadialGradFiller := TSVGRadialGradientPolygonFiller.Create(GradientLUT);
   RadialGradFiller.WrapMode := wmClamp;
