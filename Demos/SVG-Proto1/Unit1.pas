@@ -231,7 +231,7 @@ begin
         FloatRect( (imgView1.Bitmap.Width - W) / 2, (imgView1.Bitmap.Height - H) / 2, W, H), nil, 0);
       *)
     imgView1.Bitmap.SetSize(W, H);
-    imgView1.Bitmap.Clear(clWhite32);
+    imgView1.Bitmap.Clear($00FFFFFF);
 
     SVG.PaintTo( imgView1.Bitmap, FloatRect( imgView1.Bitmap.BoundsRect), nil, 0  );
 
@@ -295,7 +295,7 @@ begin
         FloatRect( (imgView1.Bitmap.Width - W) / 2, (imgView1.Bitmap.Height - H) / 2, W, H), nil, 0);
       *)
     imgView1.Bitmap.SetSize(W, H);
-    imgView1.Bitmap.Clear(clWhite32);
+    imgView1.Bitmap.Clear($00FFFFFF);
 
     SVG.PaintTo( imgView1.Bitmap, FloatRect( imgView1.Bitmap.BoundsRect), nil, 0  );
 

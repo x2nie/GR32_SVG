@@ -96,6 +96,7 @@ object Form1: TForm1
       Width = 1041
       Height = 569
       Align = alClient
+      Bitmap.DrawMode = dmBlend
       Bitmap.ResamplerClassName = 'TNearestResampler'
       BitmapAlign = baCustom
       Scale = 1.000000000000000000
