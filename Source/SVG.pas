@@ -1099,8 +1099,9 @@ begin
     try
       StrokeBrush := GetStrokeBrush;
       {Pen := GetStrokePen(StrokeBrush);
-
+      }
       try
+        {
         BeforePaint(Graphics, Brush, Pen);
         }
         if Assigned(Brush) {and (Brush.GetLastStatus = OK)} then
@@ -1116,10 +1117,11 @@ begin
           Graphics.DrawPath(Pen, FPath);
 
         AfterPaint(Graphics, Brush, Pen);
+        }
       finally
-        Pen.Free;
+        //Pen.Free;
         StrokeBrush.Free;
-      end;}
+      end;
     finally
       Brush.Free;
       TGP.Free;
@@ -4064,7 +4066,8 @@ end;
 procedure TSVGClipPath.Clear;
 begin
   inherited;
-  FreeAndNil(FClipPath);
+  if Assigned(FClipPath) then
+    FreeAndNil(FClipPath);
 end;
 
 procedure TSVGClipPath.ConstructClipPath;
@@ -4080,13 +4083,16 @@ procedure TSVGClipPath.ConstructClipPath;
   end;
 
 begin
+  if Assigned(FClipPath) then
+    FreeAndNil(FClipPath);
   FClipPath := TFlattenedPath.Create;
   AddPath(Self);
 end;
 
 destructor TSVGClipPath.Destroy;
 begin
-  FreeAndNil(FClipPath);
+  if Assigned(FClipPath) then
+    FreeAndNil(FClipPath);
   inherited;
 end;
 

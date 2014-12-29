@@ -143,7 +143,7 @@ c:\program files (x86)\borland\delphi7\Projects\Bpl\PosView7.bpl=POS View Contro
 c:\program files (x86)\borland\delphi7\Projects\Bpl\D7DIBInstall.bpl=Droopy eyes - DIBControls
 C:\Program Files (x86)\Borland\Delphi7\Projects\Bpl\D7DIBRuntime.bpl=Droopy eyes - DIBControls
 c:\program files (x86)\borland\delphi7\Projects\Bpl\ascure.bpl=lili
-c:\program files (x86)\borland\delphi7\Projects\Bpl\Artisoft70_60.bpl=Artisoft nggih meniko 
+c:\program files (x86)\borland\delphi7\Projects\Bpl\Artisoft70_60.bpl=Artisoft nggih meniko
 c:\program files (x86)\borland\delphi7\Projects\Bpl\ColorPicker.bpl=Color Picker 2000
 c:\program files (x86)\borland\delphi7\Projects\Bpl\MirrorKOLPackageD7.bpl=_KOL_ mirror controls for Delphi 7
 c:\program files (x86)\borland\delphi7\Projects\Bpl\myaddicon.bpl=Borland ToolsApi Example
@@ -152,6 +152,3 @@ c:\program files (x86)\borland\delphi7\Projects\Bpl\VirtualTreesD.bpl=Virtual Tr
 C:\Program Files (x86)\Borland\delphi7\bin\dclRave70.bpl=Rave Reports BE 5.0 Package
 C:\Program Files (x86)\Borland\delphi7\Projects\Bpl\VT_DB7.bpl=Virtual Tree DB delphi7
 c:\program files (x86)\borland\delphi7\Projects\Bpl\TB97_d7.bpl=Toolbar97 Components
-[HistoryLists\hlUnitAliases]
-Count=1
-Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;

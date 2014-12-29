@@ -39,6 +39,8 @@ type
     procedure PrintDlg1Accept(Sender: TObject);
     procedure gau1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure imgView1PaintStage(Sender: TObject; Buffer: TBitmap32;
+      StageNum: Cardinal);
 //    procedure ShellDropper1DragEnter(Sender: TObject; const DropRec: TDropRec;
   //    var Accept: Boolean);
     //procedure ShellDropper1Drop(Sender: TObject; const DropRec: TDropRec);
@@ -63,6 +65,14 @@ begin
   //Panel1.DoubleBuffered := True;
   SVG := TSVG.Create;
   imgView1.Bitmap.SetSize( imgView1.Height - 100, imgView1.Height - 100);
+  // by default, PST_CLEAR_BACKGND is executed at this stage,
+  // which, in turn, calls ExecClearBackgnd method of ImgView.
+  // Here I substitute PST_CLEAR_BACKGND with PST_CUSTOM, so force ImgView
+  // to call the OnPaintStage event instead of performing default action.
+  with ImgView1.PaintStages[0]^ do
+  begin
+    if Stage = PST_CLEAR_BACKGND then Stage := PST_CUSTOM;
+  end;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -293,6 +303,43 @@ begin
     imgView1.Invalidate;
   end;
 
+
+end;
+
+procedure TForm1.imgView1PaintStage(Sender: TObject; Buffer: TBitmap32;
+  StageNum: Cardinal);
+const            //0..1
+  Colors: array [Boolean] of TColor32 = ($FFFFFFFF, $FFB0B0B0);
+var
+  R: TRect;
+  I, J: Integer;
+  OddY: Integer;
+  TilesHorz, TilesVert: Integer;
+  TileX, TileY: Integer;
+  TileHeight, TileWidth: Integer;
+begin
+  TileHeight := 13;
+  TileWidth := 13;
+
+  TilesHorz := Buffer.Width div TileWidth;
+  TilesVert := Buffer.Height div TileHeight;
+  TileY := 0;
+
+  for J := 0 to TilesVert do
+  begin
+    TileX := 0;
+    OddY := J and $1;
+    for I := 0 to TilesHorz do
+    begin
+      R.Left := TileX;
+      R.Top := TileY;
+      R.Right := TileX + TileWidth;
+      R.Bottom := TileY + TileHeight;
+      Buffer.FillRectS(R, Colors[I and $1 = OddY]);
+      Inc(TileX, TileWidth);
+    end;
+    Inc(TileY, TileHeight);
+  end;
 
 end;
 

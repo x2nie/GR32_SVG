@@ -1,6 +1,6 @@
 object Form1: TForm1
   Left = 249
-  Top = 96
+  Top = 64
   Width = 1049
   Height = 674
   Caption = 'SVG-Viewer'
@@ -106,6 +106,7 @@ object Form1: TForm1
       ScrollBars.Visibility = svAuto
       OverSize = 0
       TabOrder = 0
+      OnPaintStage = imgView1PaintStage
     end
   end
   object ActionList1: TActionList
