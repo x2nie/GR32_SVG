@@ -294,31 +294,43 @@ begin
     M := Mult(M,PureMatrix);
   end;
 
-    T := SVGTypes.GetSVGTransformation(M);
+  T := SVGTypes.GetSVGTransformation(M);
+  try
     R.TopLeft := T.Transform(R.TopLeft);
     R.BottomRight := T.Transform(R.BottomRight);
-    T.Free;                                             
+  finally
+    T.Free;
+  end;
 
 
 
   Colors := GetColors(Alpha);
 
   GradientLUT := TColor32LookupTable.Create;
-  Gradient := TColor32Gradient.Create;
-  for i := 0 to Colors.Count -1 do
-  begin
-    Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
+  try
+    Gradient := TColor32Gradient.Create;
+    try
+      for i := 0 to Colors.Count -1 do
+      begin
+        Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
+      end;
+      Gradient.FillColorLookUpTable(GradientLUT);
+    finally
+      Gradient.Free;
+    end;
+
+    LinearGradFiller := TLinearGradientPolygonFiller.Create(GradientLUT);
+    //LinearGradFiller.GradientLUT := GradientLUT;
+    LinearGradFiller.StartPoint := R.TopLeft;
+    LinearGradFiller.EndPoint := R.BottomRight;
+    LinearGradFiller.WrapMode := wmClamp;
+
+
+    //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
+      //PSingle(Colors.Positions), Colors.Count);
+  finally
+    //GradientLUT.Free;
   end;
-  Gradient.FillColorLookUpTable(GradientLUT);
-
-  LinearGradFiller := TLinearGradientPolygonFiller.Create(GradientLUT);
-  LinearGradFiller.StartPoint := R.TopLeft;
-  LinearGradFiller.EndPoint := R.BottomRight;
-  LinearGradFiller.WrapMode := wmClamp;
-
-
-  //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
-    //PSingle(Colors.Positions), Colors.Count);
 
   Finalize(Colors);
 
@@ -401,8 +413,8 @@ begin
     Brush.SetTransform(TGP);
     TGP.Free;
   end;
-
   Result := Brush;}
+{$DEFINE SVGGRADIENT}
 var
   //Sampler: TLinearGradientSampler;
 
@@ -410,16 +422,19 @@ var
   Colors: TColors;
   Gradient : TColor32Gradient;
   GradientLUT : TColor32LookupTable;
-  RadialGradFiller : TSVGRadialGradientPolygonFiller;//TRadialGradientPolygonFiller;
+  {$IFDEF SVGGRADIENT}
+  RadialGradFiller : TSVGRadialGradientPolygonFiller;
+  {$ELSE}
+  RadialGradFiller : TRadialGradientPolygonFiller;
+  {$ENDIF}
   i : Integer;
   R : TFloatRect;
-  F : TFloatPoint;
+  F,C : TFloatPoint;
   T : TAffineTransformation;
   M : TFloatMatrix;
 begin
-  if not Assigned(DestObject) then
-    M := IdentityMatrix
-  else
+  M := IdentityMatrix;
+  if Assigned(DestObject) then
     M := DestObject.Matrix;
 
   if Assigned(DestObject) and (FGradientUnits = guObjectBoundingBox) then
@@ -431,37 +446,55 @@ begin
   Colors := GetColors(Alpha);
 
   GradientLUT := TColor32LookupTable.Create;
-  Gradient := TColor32Gradient.Create;
-  for i := 0 to Colors.Count -1 do
-  begin
-    Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
-  end;
-  Gradient.FillColorLookUpTable(GradientLUT);
+  try
+    Gradient := TColor32Gradient.Create;
+    try
+      for i := 0 to Colors.Count -1 do
+      begin
+        Gradient.AddColorStop(Colors.Positions[i], Colors.Colors[i]);
+      end;
+      Gradient.FillColorLookUpTable(GradientLUT);
+    finally
+      Gradient.Free;
+    end;
 
-  F := FloatPoint(FFX, FFY);
+    F := FloatPoint(FFX, FFY);
+    C := FloatPoint(CX,CY);
 
-  if PureMatrix[2, 2] > 0 then
-  //if PureMatrix <> IdentityMatrix then
-  begin
-    M := Mult(M,PureMatrix);
-  end;
+    if PureMatrix[2, 2] <> 0 then
+    //if PureMatrix <> IdentityMatrix then
+    begin
+      M := Mult(M,PureMatrix);
+    end;
+    
     T := SVGTypes.GetSVGTransformation(M);
-    T.SrcRect := FloatRect(-1,-1, 1, 1);
-    R.TopLeft := T.Transform(R.TopLeft);
-    R.BottomRight := T.Transform(R.BottomRight);
-    F := T.Transform(F);
+    try
+      //T.SrcRect := FloatRect(-1,-1, 1, 1);
+      R.TopLeft := T.Transform(R.TopLeft);
+      R.BottomRight := T.Transform(R.BottomRight);
+      F := T.Transform(F);
+      C := T.Transform(C);
+    finally
+      T.Free;
+    end;
 
-    T.Free;
+    {$IFDEF SVGGRADIENT}
+    RadialGradFiller := TSVGRadialGradientPolygonFiller.Create(GradientLUT);
+    RadialGradFiller.WrapMode := wmClamp;
+    RadialGradFiller.EllipseBounds := R;
+    RadialGradFiller.FocalPoint := F;
+    {$ELSE}
+    RadialGradFiller := TRadialGradientPolygonFiller.Create(GradientLUT);
+    RadialGradFiller.WrapMode := wmClamp;
+    RadialGradFiller.EllipseBounds := R;
+    RadialGradFiller.Center := C;
+    {$ENDIF}
 
-
-  RadialGradFiller := TSVGRadialGradientPolygonFiller.Create(GradientLUT);
-  RadialGradFiller.WrapMode := wmClamp;
-  RadialGradFiller.EllipseBounds := R;
-  RadialGradFiller.FocalPoint := F;
-
-  //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
-    //PSingle(Colors.Positions), Colors.Count);
-
+    //Brush.SetInterpolationColors(PGPColor(Colors.Colors),
+      //PSingle(Colors.Positions), Colors.Count);
+  finally
+    //GradientLUT.Free;
+  end;
   Finalize(Colors);
 
   {if PureMatrix.Cells[2, 2] = 1 then

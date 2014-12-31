@@ -98,7 +98,7 @@ object Form1: TForm1
       Align = alClient
       Bitmap.DrawMode = dmBlend
       Bitmap.ResamplerClassName = 'TNearestResampler'
-      BitmapAlign = baCustom
+      BitmapAlign = baTopLeft
       Scale = 1.000000000000000000
       ScaleMode = smScale
       ScrollBars.ShowHandleGrip = True

@@ -3169,6 +3169,8 @@ end;
 // TSVGEllipse
 
 procedure TSVGEllipse.ReadIn(const Node: PXMLNode);
+var
+  rx,ry : TFloat;
 begin
   inherited;
 
@@ -3177,13 +3179,16 @@ begin
 
   if Node.NodeName = 'circle' then
   begin
-    LoadLength(Node, 'r', FWidth);
-    FHeight := FWidth;
+    LoadLength(Node, 'r', rx);
+    ry := rx;
   end else
   begin
-    LoadLength(Node, 'rx', FWidth);
-    LoadLength(Node, 'ry', FHeight);
+    LoadLength(Node, 'rx', rx);
+    LoadLength(Node, 'ry', ry);
   end;
+
+  FWidth  := rx * 2;
+  FHeight := ry * 2;
 
   ConstructPath;
 end;
@@ -3208,7 +3213,7 @@ procedure TSVGEllipse.ConstructPath;
 begin
   inherited;
   FPath := TFlattenedPath.Create;
-  FPath.Ellipse(X,Y, Width, Height);
+  FPath.Ellipse(X,Y, Width/2, Height/2);
 end;
 
 // TSVGPath

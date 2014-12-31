@@ -5,7 +5,7 @@ interface
 uses
   Windows, SysUtils, Controls, Forms, XPMan,
   Dialogs, StdCtrls, Graphics,
-  SVG, ActnList, ImgList, //Slider, AngleChooser,Printers, ShellDropper
+  SVG, SVGPaint, ActnList, ImgList, //Slider, AngleChooser,Printers, ShellDropper
   ComCtrls, ToolWin, Classes,
   ExtCtrls, StdActns, GR32, GR32_Image, GR32_RangeBars;
 

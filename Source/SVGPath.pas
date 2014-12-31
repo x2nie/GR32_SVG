@@ -132,7 +132,7 @@ implementation
 uses
   SysUtils, Math,
   //GDIPAPI,
-  SVGCommon, SVGParse;
+  SVGCommon, SVGParse, SVGPathArc;
 
 // TSVGPathElement
 
@@ -318,6 +318,7 @@ begin
     //FControl2X, FControl2Y, FStopX, FStopY);
   Path.CurveTo({FStartX, FStartY,} FControl1X, FControl1Y,
     FControl2X, FControl2Y, FStopX, FStopY);
+
 end;
 
 procedure TSVGPathCurve.Read(SL: TStrings; var Position: Integer;
@@ -450,6 +451,7 @@ begin
 end;
 
 procedure TSVGPathEllipticArc.AddToPath(Path: TFlattenedPath);
+//algorithm shall taken from here http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
 var
   R: TFloatRect;
   X1, Y1, X2, Y2: TFloat;
@@ -461,12 +463,17 @@ var
   StartAngle, SweepAngle: TFloat;
   A, B, C, D: TFloat;
 begin
+  elliptical_arc_to( Path, RX, RY, XRot, Large <> 0, Sweep <> 0, FStartX, FStartY, FStopX, FStopY);
+  Exit;
+
   if (FStartX = FStopX) and (FStartY = FStopY) then
     Exit;
 
+  //F.6.6 Ensure radii are non-zero
   if (FRX = 0) or (FRY = 0) then
   begin
     //x2niePath.AddLine(FStartX, FStartY, FStopX, FStopY);
+    Path.LineTo(FStopX, FStopY);
     Exit;
   end;
 
