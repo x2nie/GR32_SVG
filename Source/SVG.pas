@@ -2975,7 +2975,7 @@ begin
   if (FRX <= 0) and (FRY <= 0) then
     FPath.Rectangle(FloatRect(FX, FY, FX + FWidth, FY + FHeight))
   else
-    FPath.RoundRect(FloatRect( FX, FY, FWidth, FHeight), FRX {, FRY});
+    FPath.RoundRect(FloatRect( FX, FY, FX+FWidth, FY+FHeight), FRX {, FRY});
 end;
 
 // TSVGLine
