@@ -1528,66 +1528,87 @@ var
   C: Integer;
   SVG: TSVGObject;
   Root: TSVG;
+  tag : WideString;
 begin
   for C := 0 to Node.childNodes.Count - 1 do
   begin
     SVG := nil;
 
-    if Node.childNodes[C].nodeName = 'g' then
-      SVG := TSVGContainer.Create(Self);
+    tag := Node.childNodes[C].nodeName;
 
-    if Node.childNodes[C].nodeName = 'switch' then
-      SVG := TSVGSwitch.Create(Self);
+    if tag = 'g' then
+      SVG := TSVGContainer.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'defs' then
-      SVG := TSVGDefs.Create(Self);
+    if tag = 'switch' then
+      SVG := TSVGSwitch.Create(Self) 
+    else
 
-    if Node.childNodes[C].nodeName = 'use' then
-      SVG := TSVGUse.Create(Self);
+    if tag = 'defs' then
+      SVG := TSVGDefs.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'rect' then
-      SVG := TSVGRect.Create(Self);
+    if tag = 'use' then
+      SVG := TSVGUse.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'line' then
-      SVG := TSVGLine.Create(Self);
+    if tag = 'rect' then
+      SVG := TSVGRect.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'polyline' then
-      SVG := TSVGPolyLine.Create(Self);
+    if tag = 'line' then
+      SVG := TSVGLine.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'polygon' then
-      SVG := TSVGPolygon.Create(Self);
+    if tag = 'polyline' then
+      SVG := TSVGPolyLine.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'circle' then
-      SVG := TSVGEllipse.Create(Self);
+    if tag = 'polygon' then
+      SVG := TSVGPolygon.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'ellipse' then
-      SVG := TSVGEllipse.Create(Self);
+    if tag = 'circle' then
+      SVG := TSVGEllipse.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'path' then
-      SVG := TSVGPath.Create(Self);
+    if tag = 'ellipse' then
+      SVG := TSVGEllipse.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'image' then
-      SVG := TSVGImage.Create(Self);
+    if tag = 'path' then
+      SVG := TSVGPath.Create(Self)
+    else
+
+    if tag = 'image' then
+      SVG := TSVGImage.Create(Self)
+    else
     {$IFDEF GPTEXT}
-    if Node.childNodes[C].nodeName = 'text' then
-      SVG := TSVGText.Create(Self);
+    if tag = 'text' then
+      SVG := TSVGText.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'tspan' then
-      SVG := TSVGTSpan.Create(Self);
+    if tag = 'tspan' then
+      SVG := TSVGTSpan.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'textPath' then
-      SVG := TSVGTextPath.Create(Self);
+    if tag = 'textPath' then
+      SVG := TSVGTextPath.Create(Self)
+    else
     {$ENDIF}
-    if Node.childNodes[C].nodeName = 'clipPath' then
-      SVG := TSVGClipPath.Create(Self);
+    if tag = 'clipPath' then
+      SVG := TSVGClipPath.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'linearGradient' then
-      SVG := TSVGLinearGradient.Create(Self);
+    if tag = 'linearGradient' then
+      SVG := TSVGLinearGradient.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'radialGradient' then
-      SVG := TSVGRadialGradient.Create(Self);
+    if tag = 'radialGradient' then
+      SVG := TSVGRadialGradient.Create(Self)
+    else
 
-    if Node.childNodes[C].nodeName = 'style' then
+    if tag = 'style' then
     begin
       Root := GetRoot;
       Root.ReadStyles(Node.childNodes[C]);
@@ -2749,14 +2770,14 @@ begin
   if ViewBox <> '' then
     FViewBox := ParseDRect(ViewBox);
 
-  {FWidth := FViewBox.Width;
-  FHeight := FViewBox.Height;}
+  FWidth := FViewBox.Width;
+  FHeight := FViewBox.Height;
 
   ReadChildren(Node);
 
   DeReferenceUse;
 
-  CalcCompleteSize;
+  CalcCompleteSize; 
 
   if ParseUnit(Node.GetAttribute('width')) = suPercent then
     FWidth := FSize.Right * 100 / FWidth;
@@ -3145,6 +3166,7 @@ begin
   //for C := 1 to FPointCount - 1 do
     //FPath.AddLine(FPoints[C - 1].X, FPoints[C - 1].Y, FPoints[C].X, FPoints[C].Y);
   FPath.Polygon(FPoints);
+  FPath.ClosePath;  
 end;
 
 

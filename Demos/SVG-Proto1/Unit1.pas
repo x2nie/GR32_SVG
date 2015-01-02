@@ -71,7 +71,7 @@ begin
   // to call the OnPaintStage event instead of performing default action.
   with ImgView1.PaintStages[0]^ do
   begin
-    if Stage = PST_CLEAR_BACKGND then Stage := PST_CUSTOM;
+    //if Stage = PST_CLEAR_BACKGND then Stage := PST_CUSTOM;
   end;
 end;
 
@@ -224,12 +224,17 @@ begin
     imgView1.BeginUpdate;
 
 
-      W := Round(SVG.Width * {Slider1.Percent}50 * 2 / 50);
-      H := Round(SVG.Height * {Slider1.Percent}50 * 2 / 50);
+      W := Round(SVG.Width * {Slider1.Percent}50 * 2/2 / 50);
+      H := Round(SVG.Height * {Slider1.Percent}50 * 2/2 / 50);
       (*
       SVG.PaintTo(imgView1.Bitmap,
         FloatRect( (imgView1.Bitmap.Width - W) / 2, (imgView1.Bitmap.Height - H) / 2, W, H), nil, 0);
       *)
+      if W or H = 0 then
+      begin
+        W := 100;
+        H := 100;
+      end;  
     imgView1.Bitmap.SetSize(W, H);
     imgView1.Bitmap.Clear($00FFFFFF);
 
