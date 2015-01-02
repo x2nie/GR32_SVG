@@ -23,7 +23,7 @@ implementation
 procedure minest(var a,b : TFloat);
 var c : TFloat;
 begin
-  if b > a then
+  if a > b then
   begin
     c := b;
     b := a;
@@ -77,11 +77,13 @@ var
   rx,ry,half_angle,kappa,sign : TFloat;
     theta0, theta1, c0,c1, s0,s1, signed_kappa : TFloat;
   nfrag,i : Integer;
+  mi,ma : TFloatPoint;
 begin
   SetLength(Result, 0);
 
     //x1,y1, x2,y2 = min(x1,x2), max(y1,y2), max(x1,x2), min(y1,y2)
-    minest(x1,x2); minest(y1,y2);
+    minest(x1,x2); minest(y2,y1);
+
 
     if abs(extent) <= 90 then
     begin
@@ -141,7 +143,7 @@ begin
         );
                           
     end;
-
+    sign := 1;
     //return point_list
 end;
 
@@ -171,6 +173,7 @@ begin
     y := xp * sphi + yp * cphi + my;
     Result := FloatPoint(x,y);
 end;
+
 function transform_from_local(p: TFloatPoint; cphi,sphi,mx,my : TFloat):  TFloatPoint; overload;
 begin
   Result := transform_from_local(p.X, p.Y, cphi,sphi,mx,my );
@@ -191,7 +194,7 @@ var
   rphi, cphi,sphi, dx,dy, x1p,y1p,lam,scale,num,den,cxp,cyp, mx,my, a : TFloat;
   dx2, dy2, dtheta,theta1 : TFloat;
   arcs, args : TArrayOfFloatPoint;
-  control_points : TArrayOfArrayOfFloatPoint;
+  CARRAY,control_points : TArrayOfArrayOfFloatPoint;
   xp : TArrayOfFloatPoint;
   p1,p2,p3,p4 : TFloatPoint;
   i : integer;
@@ -274,18 +277,22 @@ begin
     // Step 5: Break it apart into Bezier arcs.
     SetLength(arcs,0);
     control_points := bezier_arc(cxp-rx,cyp-ry,cxp+rx,cyp+ry, theta1, dtheta);
+
+    SetLength(CARRAY,0);
+
     //for x1p,y1p, x2p,y2p, x3p,y3p, x4p,y4p in control_points:
     for i := 0 to Length(control_points) -1 do
     begin
       xp := control_points[i];
         // Transform them back to asbolute space.
 
-        p2 := transform_from_local(xp[2],cphi,sphi,mx,my);
-        p3 := transform_from_local(xp[3],cphi,sphi,mx,my);
-        p4 := transform_from_local(xp[4],cphi,sphi,mx,my);
+        p2 := transform_from_local(xp[1],cphi,sphi,mx,my);
+        p3 := transform_from_local(xp[2],cphi,sphi,mx,my);
+        p4 := transform_from_local(xp[3],cphi,sphi,mx,my);
 
         //arcs.append(args)
         Path.CurveTo(p2,p3,p4);
+        append(CARRAY, [p2.X,p2.Y,  p3.X,p3.Y,  p4.X,p4.Y] );
     end;
 end;    
 
