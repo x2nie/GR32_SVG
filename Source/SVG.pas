@@ -3020,6 +3020,7 @@ begin
   //FPath.Line(X, Y, Width, Height);
   FPath.MoveTo(X,Y);
   FPath.LineTo(Width, Height);
+  FPath.ClosePath;
 end;
 
 // TSVGPolyLine

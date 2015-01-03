@@ -57,6 +57,7 @@ var
   C: Integer;
   S: WideString;
 begin
+{$IFDEF PRESERVE_RAD}
   if Angle <> '' then
   begin
     S := Angle;
@@ -95,6 +96,52 @@ begin
       Result := 0;
   end else
     Result := 0;
+
+{$ELSE}
+  //GR32 GOES HERE, using degree instead of rad
+
+  if Angle <> '' then
+  begin
+    S := Angle;
+    C := Pos('deg', S);
+    if C <> 0 then
+    begin
+      S := Copy(S, 1, C - 1);
+      if TryStrToTFloat(S, D) then
+        Result := D
+      else
+        Result := 0;
+      Exit;
+    end;
+
+    C := Pos('rad', S);
+    if C <> 0 then
+    begin
+      TryStrToTFloat(S, D);
+      Result := RadToDeg(D);
+      Exit;
+    end;
+
+    C := Pos('grad', S);
+    if C <> 0 then
+    begin
+      S := Copy(S, 1, C - 1);
+      if TryStrToTFloat(S, D) then
+        Result := GradToDeg(D)
+      else
+        Result := 0;
+      Exit;
+    end;
+
+    if TryStrToTFloat(S, D) then
+      Result := D
+    else
+      Result := 0;
+  end else
+    Result := 0;
+
+  Result := Result * -1;
+{$ENDIF}
 end;
 
 function ParseByte(const S: WideString): Byte;
@@ -344,6 +391,7 @@ function GetRotation(const S: WideString): TFloatMatrix;
 var
   SL: TWideStringList;
   X, Y, Angle: TFloat;
+  TA : TAffineTransformation;
 begin
   SL := GetValues(S, ',');
 
@@ -362,6 +410,10 @@ begin
   {$IFDEF GPPen}
   Result := CalcRotationMatrix(X, Y, Angle);
   {$ENDIF}
+  TA := TAffineTransformation.Create;
+  TA.Rotate(X,Y,Angle);
+  Result := TA.Matrix;
+  TA.Free;
 end;
 
 function GetSkewX(const S: WideString): TFloatMatrix;

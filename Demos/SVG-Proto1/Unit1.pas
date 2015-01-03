@@ -71,7 +71,7 @@ begin
   // to call the OnPaintStage event instead of performing default action.
   with ImgView1.PaintStages[0]^ do
   begin
-    //if Stage = PST_CLEAR_BACKGND then Stage := PST_CUSTOM;
+    if Stage = PST_CLEAR_BACKGND then Stage := PST_CUSTOM;
   end;
 end;
 
