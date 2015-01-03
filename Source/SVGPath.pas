@@ -187,6 +187,7 @@ end;
 procedure TSVGPathMove.AddToPath(Path: TFlattenedPath);
 begin
   //Path.BeginPath;
+  Path.ClosePath;
   Path.MoveTo(FStopX, FStopY);
 end;
 
