@@ -72,6 +72,7 @@ type
     procedure CalcObjectBounds; virtual;
 
     function GetRoot: TSVG;
+    procedure ReadChildren(const Node: PXMLNode); virtual;
   public
     constructor Create; overload; virtual;
     constructor Create(Parent: TSVGObject); overload;
@@ -153,7 +154,7 @@ type
     FHeight: TFloat;
 
     function IsFontAvailable: Boolean;
-    procedure ReadChildren(const Node: PXMLNode); virtual;
+    //procedure ReadChildren(const Node: PXMLNode); virtual;
     procedure SetStrokeDashArray(const S: WideString);
     procedure SetClipURI(const Value: WideString);
 
@@ -321,6 +322,7 @@ type
     procedure ReadIn(const Node: PXMLNode); override;
     property ViewBox: TFRect read FViewBox write SetViewBox;    
   end;
+
 
   TSVGContainer = class(TSVGBasic)
   protected
@@ -1142,7 +1144,7 @@ begin
           PolyPolylineFS( Graphics, LPath, StrokeBrush, Assigned(Brush), GetStrokeWidth(),
           jsMiter,esButt, 4.0, TGP  );
         end;
-        PolyPolylineFS( Graphics, LPath, clTrBlue32, True);
+        //PolyPolylineFS( Graphics, LPath, clTrBlue32, True);
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
 
@@ -1561,7 +1563,8 @@ begin
   end;
 end;
 
-procedure TSVGBasic.ReadChildren(const Node: PXMLNode);
+//procedure TSVGBasic.ReadChildren(const Node: PXMLNode);
+procedure TSVGObject.ReadChildren(const Node: PXMLNode);
 var
   C: Integer;
   SVG: TSVGObject;
@@ -1648,6 +1651,10 @@ begin
 
     if tag = 'symbol' then
       SVG := TSVGSymbol.Create(Self)
+    else
+
+    if tag = 'pattern' then
+      SVG := TSVGPattern.Create(Self)
     else
 
     if tag = 'style' then
@@ -1779,6 +1786,10 @@ var
   Filler: TSVGObject;
 begin
   Result := nil;
+
+  if GetStrokeWidth <= 0 then
+    Exit;
+
   Opacity := Round(255 * StrokeOpacity);
 
   if FStrokeURI <> '' then
@@ -4421,6 +4432,7 @@ procedure TSVGSymbol.SetViewBox(const Value: TFRect);
 begin
   FViewBox := Value;
 end;
+
 
 initialization
   {$WARN SYMBOL_PLATFORM OFF}

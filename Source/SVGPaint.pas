@@ -67,6 +67,18 @@ type
     procedure PaintToPath(Path: TFlattenedPath); override;
   end;
 
+  TSVGPattern = class(TSVGFiller)
+  private
+    FViewBox: TFRect;
+    FFill : TBitmapPolygonFiller;
+    procedure SetViewBox(const Value: TFRect);
+  protected
+  public
+    function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller; override;
+    procedure ReadIn(const Node: PXMLNode); override;
+    property ViewBox: TFRect read FViewBox write SetViewBox;
+  end;
+
   TSVGGradient = class(TSVGFiller)
   private
     FURI: WideString;
@@ -570,6 +582,62 @@ begin
   end;
 
   Result.Count := ColorCount;
+end;
+
+{ TSVGPattern }
+
+function TSVGPattern.GetBrush(Alpha: Byte;
+  const DestObject: TSVGBasic): TCustomPolygonFiller;
+  
+  
+
+  procedure PaintItem(const Item: TSVGObject);
+  var
+    C: Integer;
+  begin
+    //if NeedsPainting(Item) then
+    begin
+      //if InBounds(Item) then
+        Item.PaintToGraphics(TBitmap32(FFill.Pattern));
+      for C := 0 to Item.Count - 1 do
+        PaintItem(Item[C]);
+    end;
+  end;
+  
+
+var I : Integer;
+begin
+  if not Assigned(FFill) then
+  begin
+    FFill := TBitmapPolygonFiller.Create;
+    FFill.Pattern := TBitmap32.Create;
+    FFill.Pattern.SetSize(Round(FViewBox.Width), Round(FViewBox.Height));
+    FFill.Pattern.DrawMode := dmBlend;
+    FFill.Pattern.CombineMode := cmBlend;
+    FFill.Pattern.Clear($0);
+  end;
+
+  
+  for I := 0 to Count - 1 do
+        PaintItem(Items[I]);
+
+  Result := FFill;
+end;
+
+procedure TSVGPattern.ReadIn(const Node: PXMLNode);
+var LViewBox : WideString;
+begin
+  inherited;
+  LViewBox := Node.GetAttribute('viewBox');
+  if LViewBox <> '' then
+    FViewBox := ParseDRect(LViewBox);
+
+  ReadChildren(Node);
+end;
+
+procedure TSVGPattern.SetViewBox(const Value: TFRect);
+begin
+  FViewBox := Value;
 end;
 
 end.
