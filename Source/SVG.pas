@@ -311,6 +311,17 @@ type
     property ViewBox: TFRect read FViewBox write SetViewBox;
   end;
 
+  TSVGSymbol = class(TSVGBasic)
+  private
+    FViewBox: TFRect;
+    procedure SetViewBox(const Value: TFRect);
+  protected
+    function New(Parent: TSVGObject): TSVGObject; override;
+  public
+    procedure ReadIn(const Node: PXMLNode); override;
+    property ViewBox: TFRect read FViewBox write SetViewBox;    
+  end;
+
   TSVGContainer = class(TSVGBasic)
   protected
     function New(Parent: TSVGObject): TSVGObject; override;
@@ -529,6 +540,8 @@ uses
   SysUtils,
   //XMLHelp,
   //GDIPUtils,
+  GR32_Clipper,
+
   SVGParse, SVGProperties, SVGColor, SVGPaint, SVGPath, SVGCommon;
 
 // TSVGObject
@@ -1063,33 +1076,48 @@ var
   TGP : TTransformation;
   Brush, StrokeBrush : TCustomPolygonFiller;
   ClipRoot: TSVGBasic;
+  LPath : TArrayOfArrayOfFloatPoint;
 begin
   if (FPath = nil) {or (FPath.GetLastStatus <> OK)} then
     Exit;
+
+  LPath := self.FPath.Path;
 
   if FClipPath = nil then
     CalcClipPath;
 
   try
-    {if Assigned(FClipPath) then
+    if Assigned(FClipPath) then
     begin
       if ClipURI <> '' then
       begin
-        ClipRoot := TSVGBasic(GetRoot.FindByID(ClipURI));
+        {ClipRoot := TSVGBasic(GetRoot.FindByID(ClipURI));
         if Assigned(ClipRoot) then
         begin
           TGP := GetGPMatrix(ClipRoot.Matrix);
           Graphics.SetTransform(TGP);
           TGP.Free;
-        end;
+        end;}
       end;
       try
-        Graphics.SetClip(FClipPath);
+        //Graphics.SetClip(FClipPath);
       except
       end;
-      Graphics.ResetTransform;
+      //Graphics.ResetTransform;
+
+      with TClipper.Create do
+      try
+        //add multiple contours of existing polygons as subject polygons ...
+        Add(LPath, ptSubject);
+        //add the single contour of the new polygon as the clipping polygon ...
+        Add(FClipPath.Path, ptClip);
+        //do the clipping operation (result => Polys) ...
+        Execute(ctIntersection, LPath, pftEvenOdd);
+      finally
+        free;
+      end;
     end;
-    }
+    
     TGP := GetSVGTransformation({PureMatrix}Matrix);
     {
     Graphics.SetTransform(TGP);
@@ -1106,13 +1134,15 @@ begin
         }
         if Assigned(Brush) {and (Brush.GetLastStatus = OK)} then
           //Graphics.FillPath(Brush, FPath);
-          PolyPolygonFS( Graphics, self.FPath.Path, Brush, pfAlternate, TGP);
+          PolyPolygonFS( Graphics, LPath, Brush, pfAlternate, TGP);
 
 
         if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
-          PolyPolylineFS( Graphics, self.FPath.Path, StrokeBrush, Assigned(Brush), GetStrokeWidth(),
+        begin
+          PolyPolylineFS( Graphics, LPath, StrokeBrush, Assigned(Brush), GetStrokeWidth(),
           jsMiter,esButt, 4.0, TGP  );
-        //PolyPolylineFS( Graphics, self.FPath.Path, clGray32, True);
+        end;
+        PolyPolylineFS( Graphics, LPath, clTrBlue32, True);
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
 
@@ -1155,9 +1185,17 @@ procedure TSVGBasic.PaintToPath(Path: TFlattenedPath);
 var
   P: TArrayOfArrayOfFloatPoint;
   M: TFloatMatrix;
+  i : Integer;
 begin
   if FPath = nil then
     Exit;
+  Path.ClosePath;
+  for i := 0 to Length(FPath.Path)-1 do
+  begin
+    Path.Polygon(FPath.path[i]);
+  end;
+  Path.ClosePath;
+
   {$IFDEF gpMatrix}
   P := FPath.Clone;
 
@@ -1606,6 +1644,10 @@ begin
 
     if tag = 'radialGradient' then
       SVG := TSVGRadialGradient.Create(Self)
+    else
+
+    if tag = 'symbol' then
+      SVG := TSVGSymbol.Create(Self)
     else
 
     if tag = 'style' then
@@ -4105,10 +4147,12 @@ procedure TSVGClipPath.ConstructClipPath;
   var
     C: Integer;
   begin
+    FClipPath.ClosePath;
     SVG.PaintToPath(FClipPath);
 
     for C := 0 to SVG.Count - 1 do
       AddPath(TSVGBasic(SVG[C]));
+    FClipPath.ClosePath;
   end;
 
 begin
@@ -4354,6 +4398,29 @@ begin
   end;
 end;
 
+
+{ TSVGSymbol }
+
+function TSVGSymbol.New(Parent: TSVGObject): TSVGObject;
+begin
+  Result := TSVGSymbol.Create(Parent);
+end;
+
+procedure TSVGSymbol.ReadIn(const Node: PXMLNode);
+var LViewBox : WideString;
+begin
+  inherited;
+  LViewBox := Node.GetAttribute('viewBox');
+  if LViewBox <> '' then
+    FViewBox := ParseDRect(LViewBox);
+
+  ReadChildren(Node);
+end;
+
+procedure TSVGSymbol.SetViewBox(const Value: TFRect);
+begin
+  FViewBox := Value;
+end;
 
 initialization
   {$WARN SYMBOL_PLATFORM OFF}
