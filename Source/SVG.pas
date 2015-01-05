@@ -1955,10 +1955,10 @@ var
   SVG: TSVGObject;
 begin
   SVG := Self;
-  while Assigned(SVG) and (TSVGBasic(SVG).FClipURI = '') do
+  while Assigned(SVG) and (SVG is TSVGBasic) and  (TSVGBasic(SVG).FClipURI = '') do
     SVG := SVG.FParent;
 
-  if Assigned(SVG) then
+  if Assigned(SVG) and (SVG is TSVGBasic) then
     Result := TSVGBasic(SVG).FClipURI
   else
     Result := '';
