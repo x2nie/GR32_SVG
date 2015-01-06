@@ -1787,8 +1787,6 @@ var
 begin
   Result := nil;
 
-  if GetStrokeWidth <= 0 then
-    Exit;
 
   Opacity := Round(255 * StrokeOpacity);
 

@@ -68,14 +68,23 @@ type
   end;
 
   TSVGPattern = class(TSVGFiller)
+  // http://www.w3.org/TR/SVG/pservers.html#PatternElement
   private
     FViewBox: TFRect;
     FFill : TBitmapPolygonFiller;
+    FY: TFloat;
+    FHeight: TFloat;
+    FWidth: TFloat;
+    FX: TFloat;
     procedure SetViewBox(const Value: TFRect);
   protected
   public
     function GetBrush(Alpha: Byte; const DestObject: TSVGBasic): TCustomPolygonFiller; override;
     procedure ReadIn(const Node: PXMLNode); override;
+    property X: TFloat read FX write FX;
+    property Y: TFloat read FY write FY;
+    property Width: TFloat read FWidth write FWidth;
+    property Height: TFloat read FHeight write FHeight;
     property ViewBox: TFRect read FViewBox write SetViewBox;
   end;
 
@@ -603,35 +612,63 @@ function TSVGPattern.GetBrush(Alpha: Byte;
         PaintItem(Item[C]);
     end;
   end;
-  
+
 
 var I : Integer;
+
 begin
   if not Assigned(FFill) then
   begin
     FFill := TBitmapPolygonFiller.Create;
     FFill.Pattern := TBitmap32.Create;
-    FFill.Pattern.SetSize(Round(FViewBox.Width), Round(FViewBox.Height));
+    //FFill.Pattern.SetSize(Round(FViewBox.Width), Round(FViewBox.Height));
+    FFill.Pattern.SetSize(Round(Width), Round(Height));
     FFill.Pattern.DrawMode := dmBlend;
     FFill.Pattern.CombineMode := cmBlend;
     FFill.Pattern.Clear($0);
+    {if (FViewBox.Width <> 0) and (ViewBox.Height <> 0) then
+    begin
+      T := TAffineTransformation.Create;
+      T.Scale(Width / ViewBox.Width, Height / ViewBox.Height);
+      dummy := T.Transform(FloatPoint(1,1)); //validate transformation
+      Self.PureMatrix := T.Matrix;
+      T.Free;
+
+    end;}
+
+    for I := 0 to Count - 1 do
+        PaintItem(Items[I]);
   end;
 
-  
-  for I := 0 to Count - 1 do
-        PaintItem(Items[I]);
+
 
   Result := FFill;
 end;
 
 procedure TSVGPattern.ReadIn(const Node: PXMLNode);
 var LViewBox : WideString;
+  T : TAffineTransformation;
+  dummy : TFloatPoint;
 begin
   inherited;
+  LoadLength(Node, 'x', FX);
+  LoadLength(Node, 'y', FY);
+  LoadLength(Node, 'width', FWidth);
+  LoadLength(Node, 'height', FHeight);
+  
   LViewBox := Node.GetAttribute('viewBox');
   if LViewBox <> '' then
     FViewBox := ParseDRect(LViewBox);
 
+  if (FViewBox.Width <> 0) and (ViewBox.Height <> 0) then
+    begin
+      T := TAffineTransformation.Create;
+      T.Scale(Width / ViewBox.Width, Height / ViewBox.Height);
+      dummy := T.Transform(FloatPoint(1,1)); //validate transformation
+      Self.PureMatrix := T.Matrix;
+      T.Free;
+
+    end;
   ReadChildren(Node);
 end;
 
