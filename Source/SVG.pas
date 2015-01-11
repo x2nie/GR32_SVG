@@ -39,6 +39,7 @@ uses
   
   WideStringList,
   //GDIPOBJ, GDIPAPI, GDIPOBJ2, GDIPKerning, GDIPPathText,
+    GR32_VectorUtils,
   GR32, GR32_Paths, GR32_Transforms, GR32_Polygons,
   SVGTypes,
   //Matrix,
@@ -542,9 +543,49 @@ uses
   SysUtils,
   //XMLHelp,
   //GDIPUtils,
-  GR32_Clipper,
-
+  clipper,
+  GR32_Clipper,  GR32_Brushes,
   SVGParse, SVGProperties, SVGColor, SVGPaint, SVGPath, SVGCommon;
+
+
+//taken from Clipper demo  
+function AAFloatPoint2AAPoint(const a: TArrayOfArrayOfFloatPoint;
+  decimals: integer = 0): TPaths;
+var
+  i,j,decScale: integer;
+begin
+  decScale := round(power(10,decimals));
+  setlength(result, length(a));
+  for i := 0 to high(a) do
+  begin
+    setlength(result[i], length(a[i]));
+    for j := 0 to high(a[i]) do
+    begin
+      result[i][j].X := round(a[i][j].X *decScale);
+      result[i][j].Y := round(a[i][j].Y *decScale);
+    end;
+  end;
+end;
+//------------------------------------------------------------------------------
+
+function AAPoint2AAFloatPoint(const a: TPaths;
+  decimals: integer = 0): TArrayOfArrayOfFloatPoint;
+var
+  i,j,decScale: integer;
+begin
+  decScale := round(power(10,decimals));
+  setlength(result, length(a));
+  for i := 0 to high(a) do
+  begin
+    setlength(result[i], length(a[i]));
+    for j := 0 to high(a[i]) do
+    begin
+      result[i][j].X := a[i][j].X /decScale;
+      result[i][j].Y := a[i][j].Y /decScale;
+    end;
+  end;
+end;
+//------------------------------------------------------------------------------
 
 // TSVGObject
 
@@ -1069,6 +1110,53 @@ end;
 
 procedure TSVGBasic.PaintToGraphics(Graphics: TBitmap32);
 
+  function Grow(const src:TArrayOfArrayOfFloatPoint; Growth: TFloat; JoinStyle: TJoinStyle;
+    EndStyle: TEndStyle; AMiterLimit: TFloat):TArrayOfArrayOfFloatPoint ;
+
+      { clipper
+      //TJoinType & TEndType are used by OffsetPaths()
+  TJoinType = (jtSquare, jtRound, jtMiter);
+
+
+  TEndType = (etClosedPolygon, etClosedLine,
+    etOpenButt, etOpenSquare, etOpenRound); //and etSingle still to come
+    }
+
+    {
+    // Polygon join style
+    TJoinStyle = (jsMiter, jsBevel, jsRound);
+
+    // Polygon end style
+    TEndStyle = (esButt, esSquare, esRound);
+    }
+  const
+    ClipperJoinTypeOfGR32PolygonJoinStyle : array[GR32_Polygons.TJoinStyle] of clipper.TJoinType =
+      (clipper.jtMiter, clipper.jtSquare, clipper.jtRound);
+    ClipperEndTypeOfGR32PolygonEndStyle : array[GR32_Polygons.TEndStyle] of clipper.TEndType =
+      (clipper.etOpenButt, clipper.etOpenSquare, clipper.etOpenRound);
+
+
+  var solI,solutionI : TPaths;
+  begin
+
+    solutionI := AAFloatPoint2AAPoint(src);
+    with TClipperOffset.Create( ) do
+      try
+        MiterLimit := AMiterLimit;
+        AddPaths( solutionI, ClipperJoinTypeOfGR32PolygonJoinStyle[JoinStyle], ClipperEndTypeOfGR32PolygonEndStyle[EndStyle]);
+        Execute( solI, Growth/2);
+      finally
+        Free;
+      end;
+      Result := AAPoint2AAFloatPoint(solI);
+
+  end;
+  function Grow1(const src:TArrayOfArrayOfFloatPoint; Growth: TFloat):TArrayOfArrayOfFloatPoint ;
+  var solI,solutionI : TPaths;
+  begin
+    result := InflatePolygons(src, Growth/2);
+  end;
+
 var
   {Brush, StrokeBrush: TGPBrush;
   Pen: TGPPen;
@@ -1079,6 +1167,7 @@ var
   Brush, StrokeBrush : TCustomPolygonFiller;
   ClipRoot: TSVGBasic;
   LPath : TArrayOfArrayOfFloatPoint;
+  Dst: TArrayOfArrayOfFloatPoint;
 begin
   if (FPath = nil) {or (FPath.GetLastStatus <> OK)} then
     Exit;
@@ -1142,9 +1231,23 @@ begin
         if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
         begin
           PolyPolylineFS( Graphics, LPath, StrokeBrush, Assigned(Brush), GetStrokeWidth(),
-          jsMiter,esButt, 4.0, TGP  );
+          Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
         end;
-        //PolyPolylineFS( Graphics, LPath, clTrBlue32, True);
+
+        //debug
+        Dst := BuildPolyPolyLine(LPath, True, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit  );
+        PolyPolylineFS( Graphics, Dst, clRed32, True,1,jsMiter, esButt, 4, TGP);
+
+
+        Dst := Grow(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
+        //Dst := InflatePolygons(LPath, GetStrokeWidth()/2, GR32_Clipper.TJoinType(Ord( self.StrokeLineJoin)),  Self.StrokeMiterLimit  );
+        PolyPolylineFS( Graphics, Dst, clLime32 , True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
+
+        //original path
+        PolyPolylineFS( Graphics, LPath, clBlueViolet32 and $c0ffffff, Assigned(Brush), 1,
+          Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
+
+
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
 
