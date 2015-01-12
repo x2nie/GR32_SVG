@@ -1151,10 +1151,21 @@ procedure TSVGBasic.PaintToGraphics(Graphics: TBitmap32);
       Result := AAPoint2AAFloatPoint(solI);
 
   end;
-  function Grow1(const src:TArrayOfArrayOfFloatPoint; Growth: TFloat):TArrayOfArrayOfFloatPoint ;
+  function Grow1(const src:TArrayOfArrayOfFloatPoint; Growth: TFloat; JoinStyle: TJoinStyle;
+    EndStyle: TEndStyle; AMiterLimit: TFloat):TArrayOfArrayOfFloatPoint ;
+  { //gr32_clipper
+    TJoinType = (jtSquare, jtRound, jtMiter);
+
+    // Polygon join style
+    TJoinStyle = (jsMiter, jsBevel, jsRound);
+
+  }
+  const
+    GR32ClipperJoinTypeOfGR32PolygonJoinStyle : array[GR32_Polygons.TJoinStyle] of GR32_Clipper.TJoinType =
+      (GR32_Clipper.jtMiter, GR32_Clipper.jtSquare, GR32_Clipper.jtRound);
   var solI,solutionI : TPaths;
   begin
-    result := InflatePolygons(src, Growth/2);
+    result := InflatePolygons( src, Growth/2, GR32ClipperJoinTypeOfGR32PolygonJoinStyle[JoinStyle], AMiterLimit, False);
   end;
 
 var
@@ -1224,29 +1235,35 @@ begin
         BeforePaint(Graphics, Brush, Pen);
         }
         if Assigned(Brush) {and (Brush.GetLastStatus = OK)} then
-          //Graphics.FillPath(Brush, FPath);
+        begin
           PolyPolygonFS( Graphics, LPath, Brush, pfAlternate, TGP);
+        end;
 
 
         if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
         begin
-          PolyPolylineFS( Graphics, LPath, StrokeBrush, Assigned(Brush), GetStrokeWidth(),
-          Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
+          PolyPolylineFS( Graphics, LPath, StrokeBrush, Assigned(Brush),
+            GetStrokeWidth(), Self.StrokeLineJoin ,Self.StrokeLineCap,
+            self.StrokeMiterLimit, TGP  );
         end;
 
         //debug
+        {
         Dst := BuildPolyPolyLine(LPath, True, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit  );
-        PolyPolylineFS( Graphics, Dst, clRed32, True,1,jsMiter, esButt, 4, TGP);
+        PolyPolylineFS( Graphics, Dst, clTrRed32, True,1,jsMiter, esButt, 4, TGP);
 
+        //CLIPPER
+        //Dst := Grow(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
+        //PolyPolylineFS( Graphics, Dst, clYellow32 , True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
 
-        Dst := Grow(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
-        //Dst := InflatePolygons(LPath, GetStrokeWidth()/2, GR32_Clipper.TJoinType(Ord( self.StrokeLineJoin)),  Self.StrokeMiterLimit  );
-        PolyPolylineFS( Graphics, Dst, clLime32 , True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
+        //GR32_CLIPPER
+        //Dst := Grow1(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
+        //PolyPolygonFS( Graphics, Dst, clBlue32 and $88FFFFFF, pfWinding, TGP);
+        //PolyPolylineFS( Graphics, Dst, clLime32 AND $88FFFFFF, True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
 
         //original path
-        PolyPolylineFS( Graphics, LPath, clBlueViolet32 and $c0ffffff, Assigned(Brush), 1,
-          Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
-
+        PolyPolylineFS( Graphics, LPath, clBlueViolet32 and $c0ffffff, Assigned(Brush), 1, Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
+        }
 
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
           Graphics.DrawPath(Pen, FPath);
