@@ -153,6 +153,7 @@ type
     FY: TFloat;
     FWidth: TFloat;
     FHeight: TFloat;
+    FFillRuleEvenOdd: Boolean;
 
     function IsFontAvailable: Boolean;
     //procedure ReadChildren(const Node: PXMLNode); virtual;
@@ -218,6 +219,7 @@ type
     property FillColor: Integer read GetFillColor write FFillColor;
     property StrokeColor: Integer read GetStrokeColor write FStrokeColor;
     property FillOpacity: TFloat read GetFillOpacity write FFillOpacity;
+    property FillRuleEvenOdd : Boolean read FFillRuleEvenOdd write FFillRuleEvenOdd;
     property StrokeOpacity: TFloat read GetStrokeOpacity write FStrokeOpacity;
     property StrokeWidth: TFloat read GetStrokeWidth write FStrokeWidth;
     property ClipURI: WideString read GetClipURI write SetClipURI;
@@ -1168,6 +1170,8 @@ procedure TSVGBasic.PaintToGraphics(Graphics: TBitmap32);
     result := InflatePolygons( src, Growth/2, GR32ClipperJoinTypeOfGR32PolygonJoinStyle[JoinStyle], AMiterLimit, False);
   end;
 
+const
+  LFillRule : array[Boolean] of tpolyFillMode = (pfNonZero, pfEvenOdd); 
 var
   {Brush, StrokeBrush: TGPBrush;
   Pen: TGPPen;
@@ -1236,7 +1240,9 @@ begin
         }
         if Assigned(Brush) {and (Brush.GetLastStatus = OK)} then
         begin
-          PolyPolygonFS( Graphics, LPath, Brush, pfAlternate, TGP);
+
+
+          PolyPolygonFS( Graphics, LPath, Brush, LFillRule[self.FillRuleEvenOdd], TGP);
         end;
 
 
@@ -1583,6 +1589,10 @@ begin
   Value := Style.Values['fill-opacity'];
   if Value <> '' then
     FFillOpacity := ParsePercent(Value);
+
+  Value := Style.Values['fill-rule'];
+    if Value = 'evenodd' then
+      FFillRuleEvenOdd := True;
 
   Value := Style.Values['color'];
   if Value <> '' then
