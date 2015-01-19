@@ -1183,6 +1183,7 @@ var
   ClipRoot: TSVGBasic;
   LPath : TArrayOfArrayOfFloatPoint;
   Dst: TArrayOfArrayOfFloatPoint;
+  LineClosed : Boolean;
 begin
   if (FPath = nil) {or (FPath.GetLastStatus <> OK)} then
     Exit;
@@ -1248,7 +1249,9 @@ begin
 
         if Assigned(StrokeBrush) {and (Brush.GetLastStatus = OK)} then
         begin
-          PolyPolylineFS( Graphics, LPath, StrokeBrush, Assigned(Brush),
+          LineClosed := Assigned(Brush);// or not (Self is TSVGLine);
+
+          PolyPolylineFS( Graphics, LPath, StrokeBrush, LineClosed,
             GetStrokeWidth(), Self.StrokeLineJoin ,Self.StrokeLineCap,
             self.StrokeMiterLimit, TGP  );
         end;
@@ -1257,18 +1260,18 @@ begin
         {
         Dst := BuildPolyPolyLine(LPath, True, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit  );
         PolyPolylineFS( Graphics, Dst, clTrRed32, True,1,jsMiter, esButt, 4, TGP);
-
+        
         //CLIPPER
-        //Dst := Grow(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
-        //PolyPolylineFS( Graphics, Dst, clYellow32 , True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
+        Dst := Grow(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
+        PolyPolylineFS( Graphics, Dst, clYellow32 , True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
 
         //GR32_CLIPPER
-        //Dst := Grow1(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
-        //PolyPolygonFS( Graphics, Dst, clBlue32 and $88FFFFFF, pfWinding, TGP);
-        //PolyPolylineFS( Graphics, Dst, clLime32 AND $88FFFFFF, True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
+        Dst := Grow1(LPath, GetStrokeWidth(), Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit);
+        PolyPolygonFS( Graphics, Dst, clWhite32 and $88FFFFFF, pfWinding, TGP);
+        PolyPolylineFS( Graphics, Dst, clLime32 AND $88FFFFFF, True,1,Self.StrokeLineJoin  ,Self.StrokeLineCap, 2, TGP);
 
         //original path
-        PolyPolylineFS( Graphics, LPath, clBlueViolet32 and $c0ffffff, Assigned(Brush), 1, Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
+        PolyPolylineFS( Graphics, LPath, clWhite32 and $c0ffffff, Assigned(Brush), 1, Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP  );
         }
 
         {if Assigned(Pen) and (Pen.GetLastStatus = OK) then
