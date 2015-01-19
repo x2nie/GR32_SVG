@@ -33,7 +33,13 @@ type
     chkDebugRoute: TCheckBox;
     BtnLayerRescale: TButton;
     BtnLayerResetScale: TButton;
-    CbxCropped: TCheckBox;
+    chkNodes: TCheckBox;
+    pnlStroke: TPanel;
+    Label2: TLabel;
+    Panel4: TPanel;
+    gbrStrokeBig: TGaugeBar;
+    Label3: TLabel;
+    gbrStrokeSmall: TGaugeBar;
     procedure gau1Change(Sender: TObject);
     procedure imgView1PaintStage(Sender: TObject; Buffer: TBitmap32;
       StageNum: Cardinal);
@@ -43,8 +49,14 @@ type
     procedure Rebuild(Sender: TObject);
     procedure gbrFillOpacityMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure gbrStrokeBigMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure gbrStrokeSmallMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     { Private declarations }
+    FStrokeWidth : array[0..1] of TFloat;
+
     FFillOpacity : Cardinal;
     FTransform : TAffineTransformation;
     procedure SetFillOpacity(const Value: Cardinal);
@@ -94,6 +106,20 @@ const
   svgHeight = 1540 div 4;
 
 
+procedure Dots(Buffer: TBitmap32;
+  const Points: TArrayOfArrayOfFloatPoint; Transformation: TTransformation; AColor: TColor32 = clLime32);
+var i,j : Integer;
+  C : TArrayOfFloatPoint;
+begin
+  for i := 0 to Length(Points)-1 do
+  for j := 0 to Length(Points[i])-1 do
+  begin
+    C := Circle(Points[i,j], 0.8,6);
+    PolygonFS( Buffer, C, AColor and $c0ffffff, pfWinding, Transformation);
+  end;
+
+end;
+  
 procedure TfrmMain.FormCreate(Sender: TObject);
 
   procedure RegisterRenderer(AMethod : TRendererMethod; ATitle : string);
@@ -131,7 +157,8 @@ begin
   begin
     if Stage = PST_CLEAR_BACKGND then Stage := PST_CUSTOM;
   end;
-
+  FStrokeWidth[1] := 27.63601;
+  FStrokeWidth[0] := 8.736;
   FillOpacity := gbrFillOpacity.Position;
   cbbRenderer.ItemIndex := 0;
   Rebuild(Self);  
@@ -219,7 +246,9 @@ var i : Integer;
 begin
   for i := 0 to Length(AccData) -1 do
   begin
-    FRenderer[cbbRenderer.ItemIndex](imgView1.Bitmap, AccData[i], LLineWidth[i],
+    FRenderer[cbbRenderer.ItemIndex](imgView1.Bitmap, AccData[i],
+      //LLineWidth[i],
+      FStrokeWidth[i mod 2],
       LJoinStyle[i], esButt, 4, FTransform );
 
         //original path
@@ -227,6 +256,7 @@ begin
       False, 2, jsMiter, esButt, 4, FTransform
       //Assigned(Brush), 1, Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP
       );
+    Dots(imgView1.Bitmap, AccData[i], FTransform, ClYellow32);
   end;
 //  FRenderer[cbbRenderer.ItemIndex]();
 end;
@@ -245,6 +275,10 @@ begin
 
   if chkDebugRoute.Checked then
     PolyPolylineFS(Buffer, Dst, clBlue32, True, 1, jsMiter, esButt, 2, Transformation);
+
+  if chkNodes.Checked then
+    Dots(Buffer, Dst, Transformation);
+
 end;
 
 
@@ -323,8 +357,13 @@ begin
   
   //if chkDebugRoute.Checked then
     PolyPolylineFS(Buffer, Dst, clGreen32 , True,1, jsMiter, esButt, 2, Transformation);
+  if chkNodes.Checked then
+    Dots(Buffer, Dst, Transformation);
 end;
 {$ENDIF}
+
+
+
 
 procedure TfrmMain.DoRender_GR32_Clipper(Buffer: TBitmap32;
   const Points: TArrayOfArrayOfFloatPoint; ALineWidth: TFloat;
@@ -345,6 +384,8 @@ begin
 
   if chkDebugRoute.Checked then
   PolyPolylineFS(Buffer, Dst, clTrRed32, True, 2, jsMiter, esButt, 2, Transformation);
+  if chkNodes.Checked then
+    Dots(Buffer, Dst, Transformation);
 end;
 
 procedure TfrmMain.SetFillOpacity(const Value: Cardinal);
@@ -360,6 +401,20 @@ procedure TfrmMain.gbrFillOpacityMouseUp(Sender: TObject;
 begin
   FillOpacity := gbrFillOpacity.Position;
   Rebuild(Sender);
+end;
+
+procedure TfrmMain.gbrStrokeBigMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  FStrokeWidth[1] := gbrStrokeBig.Position /2;
+  Rebuild(self);
+end;
+
+procedure TfrmMain.gbrStrokeSmallMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  FStrokeWidth[0] := gbrStrokeSmall.Position /2;
+  Rebuild(self);
 end;
 
 end.

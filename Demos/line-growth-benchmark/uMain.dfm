@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 311
-  Top = 165
+  Left = 312
+  Top = 172
   Width = 928
   Height = 480
   Caption = 'LineGrow Benchmark'
@@ -170,13 +170,84 @@ object frmMain: TfrmMain
           Caption = 'Scale to 100%'
           TabOrder = 4
         end
-        object CbxCropped: TCheckBox
+      end
+      object pnlStroke: TPanel
+        Left = 1
+        Top = 169
+        Width = 129
+        Height = 168
+        Align = alTop
+        TabOrder = 1
+        object Label2: TLabel
+          Left = 8
+          Top = 24
+          Width = 18
+          Height = 13
+          Caption = 'Big:'
+        end
+        object Label3: TLabel
+          Left = 8
+          Top = 56
+          Width = 28
+          Height = 13
+          Caption = 'Small:'
+        end
+        object Panel4: TPanel
+          Left = 1
+          Top = 1
+          Width = 127
+          Height = 16
+          Align = alTop
+          BevelOuter = bvNone
+          Caption = 'Stroke Properties'
+          Color = clBtnShadow
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindow
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 0
+        end
+        object gbrStrokeBig: TGaugeBar
           Left = 16
-          Top = 88
+          Top = 40
+          Width = 105
+          Height = 12
+          Backgnd = bgPattern
+          HandleSize = 16
+          Max = 64
+          ShowArrows = False
+          ShowHandleGrip = True
+          Style = rbsMac
+          Position = 54
+          OnMouseUp = gbrStrokeBigMouseUp
+        end
+        object gbrStrokeSmall: TGaugeBar
+          Tag = 1
+          Left = 16
+          Top = 72
+          Width = 105
+          Height = 12
+          Backgnd = bgPattern
+          HandleSize = 16
+          Max = 64
+          ShowArrows = False
+          ShowHandleGrip = True
+          Style = rbsMac
+          Position = 17
+          OnMouseUp = gbrStrokeSmallMouseUp
+        end
+        object chkNodes: TCheckBox
+          Left = 11
+          Top = 92
           Width = 97
           Height = 17
-          Caption = '&Cropped'
-          TabOrder = 5
+          Caption = '&Nodes'
+          Checked = True
+          State = cbChecked
+          TabOrder = 3
+          OnClick = Rebuild
         end
       end
     end
