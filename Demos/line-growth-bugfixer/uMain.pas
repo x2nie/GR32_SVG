@@ -45,6 +45,7 @@ type
     Panel5: TPanel;
     CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
+    chkNormal: TCheckBox;
     procedure gau1Change(Sender: TObject);
     procedure imgView1PaintStage(Sender: TObject; Buffer: TBitmap32;
       StageNum: Cardinal);
@@ -61,6 +62,7 @@ type
     procedure imgView1MouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer; Layer: TCustomLayer);
     procedure imgView1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
     FMyPolygon,
@@ -123,6 +125,82 @@ begin
   begin
     C := Circle(Points[i,j], 0.8,6);
     PolygonFS( Buffer, C, AColor and $c0ffffff, pfWinding, Transformation);
+  end;
+end;
+
+procedure ShowNormals(Buffer: TBitmap32;
+  const Points, Normals: TArrayOfArrayOfFloatPoint;
+  LineWidth : TFloat;
+  Transformation: TTransformation; AColor: TColor32 = clLime32);
+var i,j,w,h,x,y : Integer;
+  P, P0 : TPoint;
+  PF : TFloatPoint;
+  R : TRect;
+  flip : Boolean; //flip flop
+  s : string;
+  clBg : TColor32;
+  AALevel : Integer;
+begin
+  Buffer.Font.Size := 10;
+  h := Buffer.TextHeight('IjgMh9');
+  clBg := clTrRed32;
+  AALevel := 1;
+
+  P0 := Point(0,0);
+  for i := 0 to Length(Points)-1 do
+  for j := 0 to Length(Points[i])-1 do
+  begin
+    with Normals[i,j] do
+      if (X = 0) and (X = 0) then
+        Continue;
+    //if flip then
+    begin
+      PF.X := Points[i,j].X + Normals[i,j].X * LineWidth /2;
+      PF.Y := Points[i,j].Y + Normals[i,j].Y * LineWidth /2;
+      
+      //P := Transformation.Transform(Point( OffsetPoint( Points[i,j], Normals[i,j]) ));
+      P := Point(Transformation.Transform( PF ));
+      
+      //draw line
+      P0 := Point(Transformation.Transform( Points[i,j] ));
+      Buffer.LineS(P.X, P.Y, P0.X, P0.Y, clRed32);
+
+      //if Distance(P, P0) > 32 then
+      begin
+        s := IntToStr(J);
+        w := Buffer.TextWidth(s);
+        x := P.X - w div 2;
+        y := P.Y - h div 2;
+        R := MakeRect(x,y, x+w, y+h);
+        //InflateRect(R,2,2);
+        //Buffer.FillRectS(R, clTrWhite32);
+        P0 := P;
+        P.X := X;
+        P.Y := Y;
+
+        //top left
+        P := OffsetPoint(P, -1, -1);
+        Buffer.RenderText(P.X,P.Y, s, AALevel, clBg);
+
+        //top right
+        P := OffsetPoint(P, 2, 0);
+        Buffer.RenderText(P.X,P.Y, s, AALevel, clBg);
+
+        //bot right
+        P := OffsetPoint(P, 0, 2);
+        Buffer.RenderText(P.X,P.Y, s, AALevel, clBg);
+
+        //bot left
+        P := OffsetPoint(P, -2, 0);
+        Buffer.RenderText(P.X,P.Y, s, AALevel, clBg);
+
+        //center
+        P := OffsetPoint(P, 1, -1);
+
+        Buffer.RenderText(P.X,P.Y, s, 1, clWhite32);
+      end;
+    end;
+    flip := not flip;
   end;
 end;
 
@@ -353,6 +431,9 @@ begin
       //Assigned(Brush), 1, Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP
       );
 
+    if chkNormal.Checked then
+      ShowNormals(imgView1.Bitmap, accData[i], FMyNormals, FStrokeWidth[0], FTransform);
+
     Dots(imgView1.Bitmap, AccData[i], FTransform, ClYellow32);
 
     if chkNumber.Checked then
@@ -527,6 +608,11 @@ end;
 procedure TfrmMain.imgView1Click(Sender: TObject);
 begin
   NodeLocked := not NodeLocked;
+end;
+
+procedure TfrmMain.FormShow(Sender: TObject);
+begin
+  SetBounds(0,0, Screen.WorkAreaWidth, Screen.WorkAreaHeight);
 end;
 
 end.

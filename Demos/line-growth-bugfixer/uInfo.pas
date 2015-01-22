@@ -26,6 +26,7 @@ type
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure ts1Change(Sender: TObject; NewTab: Integer;
       var AllowChange: Boolean);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     FI, FJ : Integer;
@@ -53,11 +54,13 @@ begin
   if i < 0 then
   begin
     vt1.RootNodeCount := 0;
+    FI := i; //clear cache
   end
   else
   begin
     if FI <> i then
     begin
+      FI := i; // begin cache
       FPolygon := @frmMain.MyPolygon^[i];
       FNormals := @frmMain.MyNormals^[i];
       vt1.RootNodeCount := Length(FPolygon^);
@@ -93,7 +96,7 @@ begin
       4 : F := FPolygon^[i].Y;
     end;
 
-    CellText := FloatToStrF(F, ffNumber	, 5,2);
+    CellText := FloatToStrF(F, ffNumber	, 5,3);
   end;
 
 end;
@@ -124,6 +127,11 @@ procedure TfrmInfo.ts1Change(Sender: TObject; NewTab: Integer;
   var AllowChange: Boolean);
 begin
   pg1.ActivePageIndex := ts1.TabIndex;
+end;
+
+procedure TfrmInfo.FormCreate(Sender: TObject);
+begin
+  FI := -2;
 end;
 
 end.

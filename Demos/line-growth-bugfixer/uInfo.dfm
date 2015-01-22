@@ -14,6 +14,7 @@ object frmInfo: TfrmInfo
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Visible = True
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object ts1: TTabSet

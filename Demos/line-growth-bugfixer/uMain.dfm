@@ -2,7 +2,7 @@ object frmMain: TfrmMain
   Left = 226
   Top = 180
   Width = 928
-  Height = 487
+  Height = 522
   Caption = 'LineGrow Benchmark'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,8 +11,8 @@ object frmMain: TfrmMain
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
-  WindowState = wsMaximized
   OnCreate = FormCreate
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Panel2: TPanel
@@ -65,7 +65,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 52
     Width = 920
-    Height = 408
+    Height = 443
     Align = alClient
     BevelOuter = bvNone
     Color = clWhite
@@ -75,7 +75,7 @@ object frmMain: TfrmMain
       Left = 0
       Top = 0
       Width = 789
-      Height = 408
+      Height = 443
       Align = alClient
       Bitmap.DrawMode = dmBlend
       Bitmap.CombineMode = cmMerge
@@ -98,7 +98,7 @@ object frmMain: TfrmMain
       Left = 789
       Top = 0
       Width = 131
-      Height = 408
+      Height = 443
       Align = alRight
       TabOrder = 1
       object PnlBitmapLayer: TPanel
@@ -261,6 +261,17 @@ object frmMain: TfrmMain
           Checked = True
           State = cbChecked
           TabOrder = 4
+          OnClick = Rebuild
+        end
+        object chkNormal: TCheckBox
+          Left = 11
+          Top = 140
+          Width = 97
+          Height = 17
+          Caption = 'No&rmal'
+          Checked = True
+          State = cbChecked
+          TabOrder = 5
           OnClick = Rebuild
         end
       end
