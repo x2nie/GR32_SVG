@@ -1,8 +1,8 @@
 object frmMain: TfrmMain
   Left = 256
-  Top = 190
+  Top = 31
   Width = 928
-  Height = 522
+  Height = 681
   Caption = 'LineGrow Benchmark'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -66,7 +66,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 52
     Width = 920
-    Height = 443
+    Height = 602
     Align = alClient
     BevelOuter = bvNone
     Color = clWhite
@@ -76,7 +76,7 @@ object frmMain: TfrmMain
       Left = 0
       Top = 0
       Width = 789
-      Height = 443
+      Height = 602
       Align = alClient
       Bitmap.DrawMode = dmBlend
       Bitmap.CombineMode = cmMerge
@@ -99,14 +99,14 @@ object frmMain: TfrmMain
       Left = 789
       Top = 0
       Width = 131
-      Height = 443
+      Height = 602
       Align = alRight
       TabOrder = 1
       object PnlBitmapLayer: TPanel
         Left = 1
         Top = 89
         Width = 129
-        Height = 168
+        Height = 96
         Align = alTop
         TabOrder = 0
         object LblOpacity: TLabel
@@ -159,42 +159,36 @@ object frmMain: TfrmMain
           OnClick = Rebuild
         end
         object BtnLayerRescale: TButton
-          Left = 16
-          Top = 112
+          Left = 112
+          Top = 16
           Width = 105
           Height = 17
           Caption = 'Rescale'
           TabOrder = 3
-        end
-        object BtnLayerResetScale: TButton
-          Left = 16
-          Top = 136
-          Width = 105
-          Height = 17
-          Caption = 'Scale to 100%'
-          TabOrder = 4
+          Visible = False
         end
       end
       object pnlStroke: TPanel
         Left = 1
-        Top = 257
+        Top = 185
         Width = 129
-        Height = 168
+        Height = 336
         Align = alTop
         TabOrder = 1
-        object Label2: TLabel
-          Left = 8
-          Top = 24
-          Width = 18
-          Height = 13
-          Caption = 'Big:'
-        end
         object Label3: TLabel
           Left = 8
-          Top = 56
-          Width = 28
+          Top = 25
+          Width = 31
           Height = 13
-          Caption = 'Small:'
+          Caption = 'Width:'
+        end
+        object lblStrokeWidth: TLabel
+          Left = 117
+          Top = 25
+          Width = 3
+          Height = 13
+          Alignment = taRightJustify
+          Caption = '-'
         end
         object Panel4: TPanel
           Left = 1
@@ -213,24 +207,10 @@ object frmMain: TfrmMain
           ParentFont = False
           TabOrder = 0
         end
-        object gbrStrokeBig: TGaugeBar
-          Left = 16
-          Top = 40
-          Width = 105
-          Height = 12
-          Backgnd = bgPattern
-          HandleSize = 16
-          Max = 64
-          ShowArrows = False
-          ShowHandleGrip = True
-          Style = rbsMac
-          Position = 54
-          OnMouseUp = gbrStrokeBigMouseUp
-        end
         object gbrStrokeSmall: TGaugeBar
           Tag = 1
           Left = 16
-          Top = 72
+          Top = 41
           Width = 105
           Height = 12
           Backgnd = bgPattern
@@ -240,37 +220,77 @@ object frmMain: TfrmMain
           ShowHandleGrip = True
           Style = rbsMac
           Position = 17
+          OnChange = gbrStrokeSmallChange
           OnMouseUp = gbrStrokeSmallMouseUp
         end
         object chkNodes: TCheckBox
           Left = 11
-          Top = 92
+          Top = 61
           Width = 97
           Height = 17
           Caption = '&Nodes'
           Checked = True
           State = cbChecked
-          TabOrder = 3
+          TabOrder = 2
           OnClick = Rebuild
         end
         object chkNumber: TCheckBox
           Left = 11
-          Top = 116
+          Top = 85
           Width = 97
           Height = 17
           Caption = 'N&umber'
           Checked = True
           State = cbChecked
-          TabOrder = 4
+          TabOrder = 3
           OnClick = Rebuild
         end
         object chkNormal: TCheckBox
           Left = 11
-          Top = 140
+          Top = 109
           Width = 97
           Height = 17
           Caption = 'No&rmal'
+          TabOrder = 4
+          OnClick = Rebuild
+        end
+        object chkStrokeClosed: TCheckBox
+          Left = 11
+          Top = 133
+          Width = 97
+          Height = 17
+          Caption = '&Close'
           TabOrder = 5
+          OnClick = Rebuild
+        end
+        object rgJoinStyle: TRadioGroup
+          Left = 8
+          Top = 168
+          Width = 113
+          Height = 73
+          Caption = ' JoinStyle '
+          Ctl3D = True
+          ItemIndex = 0
+          Items.Strings = (
+            'Miter'
+            'Bevel'
+            'Round')
+          ParentCtl3D = False
+          TabOrder = 6
+          OnClick = Rebuild
+        end
+        object rgEndStyle: TRadioGroup
+          Left = 8
+          Top = 256
+          Width = 113
+          Height = 73
+          Caption = 'EndStyle'
+          ItemIndex = 0
+          Items.Strings = (
+            'Butt'
+            'Square'
+            'Round')
+          TabOrder = 7
           OnClick = Rebuild
         end
       end

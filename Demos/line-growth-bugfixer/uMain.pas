@@ -30,12 +30,9 @@ type
     gbrFillOpacity: TGaugeBar;
     chkDebugRoute: TCheckBox;
     BtnLayerRescale: TButton;
-    BtnLayerResetScale: TButton;
     chkNodes: TCheckBox;
     pnlStroke: TPanel;
-    Label2: TLabel;
     Panel4: TPanel;
-    gbrStrokeBig: TGaugeBar;
     Label3: TLabel;
     gbrStrokeSmall: TGaugeBar;
     chkNumber: TCheckBox;
@@ -44,6 +41,10 @@ type
     CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
     chkNormal: TCheckBox;
+    lblStrokeWidth: TLabel;
+    chkStrokeClosed: TCheckBox;
+    rgJoinStyle: TRadioGroup;
+    rgEndStyle: TRadioGroup;
     procedure gau1Change(Sender: TObject);
     procedure imgView1PaintStage(Sender: TObject; Buffer: TBitmap32;
       StageNum: Cardinal);
@@ -53,14 +54,13 @@ type
     procedure Rebuild(Sender: TObject);
     procedure gbrFillOpacityMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure gbrStrokeBigMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
     procedure gbrStrokeSmallMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure imgView1MouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer; Layer: TCustomLayer);
     procedure imgView1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure gbrStrokeSmallChange(Sender: TObject);
   private
     { Private declarations }
     FMyPolygon,
@@ -97,7 +97,6 @@ var
 implementation
 
 uses
-  //acc_data,
   acc_single_data,
   GR32_VectorUtils,  GR32_Geometry,
   Math
@@ -416,7 +415,11 @@ begin
     FRenderer[cbbRenderer.ItemIndex](imgView1.Bitmap, AccData[i],
       //LLineWidth[i],
       FStrokeWidth[i mod 2],
-      LJoinStyle[i], esButt, 4, FTransform );
+      //LJoinStyle[i],
+      TJoinStyle(rgJoinStyle.ItemIndex),
+      ///esButt,
+      TEndStyle(rgEndStyle.ItemIndex),
+      4, FTransform );
 
         //original path
     PolyPolylineFS( imgView1.Bitmap, AccData[i], clTrBlack32, //
@@ -426,7 +429,10 @@ begin
 
     // positives
     PolyPolylineFS( imgView1.Bitmap, FPositives, clAqua32 and clTrWhite32, //
-      False, 1, jsMiter, esButt, 4, FTransform
+      False, 1,
+      TJoinStyle(rgJoinStyle.ItemIndex),
+      TEndStyle(rgEndStyle.ItemIndex),
+      4, FTransform
       //Assigned(Brush), 1, Self.StrokeLineJoin  ,Self.StrokeLineCap, self.StrokeMiterLimit, TGP
       );
 
@@ -463,7 +469,7 @@ begin
     PolyPolylineFS( Buffer, Points, clBlue32 and FillOpacity, True, ALineWidth,
       AJoinStyle, AEndStyle, AMiterLimit, Transformation);
 
-  Dst := BuildPolyPolyLine(Points, True, ALineWidth, AJoinStyle  , AEndStyle, AMiterLimit  );
+  Dst := BuildPolyPolyLine(Points, chkStrokeClosed.Checked, ALineWidth, AJoinStyle  , AEndStyle, AMiterLimit  );
   //PolyPolylineFS( Graphics, Dst, clTrRed32, True,1,jsMiter, esButt, 4, TGP);
 
   if chkDebugRoute.Checked then
@@ -489,13 +495,6 @@ procedure TfrmMain.gbrFillOpacityMouseUp(Sender: TObject;
 begin
   FillOpacity := gbrFillOpacity.Position;
   Rebuild(Sender);
-end;
-
-procedure TfrmMain.gbrStrokeBigMouseUp(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  FStrokeWidth[1] := gbrStrokeBig.Position /2;
-  Rebuild(self);
 end;
 
 procedure TfrmMain.gbrStrokeSmallMouseUp(Sender: TObject;
@@ -612,6 +611,11 @@ end;
 procedure TfrmMain.FormShow(Sender: TObject);
 begin
   SetBounds(0,0, Screen.WorkAreaWidth, Screen.WorkAreaHeight);
+end;
+
+procedure TfrmMain.gbrStrokeSmallChange(Sender: TObject);
+begin
+  lblStrokeWidth.Caption := FloatToStr(gbrStrokeSmall.Position /2);
 end;
 
 end.
