@@ -9,8 +9,6 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs,
   GR32, GR32_Polygons, GR32_Image, GR32_Layers, GR32_RangeBars, GR32_Transforms,
-  {$IFDEF CLIPPER_621}  clipper, {$ENDIF}
-  {$IFDEF GR32_CLIPPER} GR32_Clipper, {$ENDIF}
   StdCtrls, ExtCtrls;
 
 type
@@ -288,6 +286,7 @@ begin
   end;
 
 end;
+
 procedure TfrmMain.FormCreate(Sender: TObject);
 
   procedure RegisterRenderer(AMethod : TRendererMethod; ATitle : string);

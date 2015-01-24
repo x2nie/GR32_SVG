@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 226
-  Top = 180
+  Left = 256
+  Top = 190
   Width = 928
   Height = 522
   Caption = 'LineGrow Benchmark'
@@ -21,6 +21,7 @@ object frmMain: TfrmMain
     Width = 920
     Height = 52
     Align = alTop
+    BevelOuter = bvNone
     TabOrder = 0
     object lbZoom: TLabel
       Left = 32
@@ -269,8 +270,6 @@ object frmMain: TfrmMain
           Width = 97
           Height = 17
           Caption = 'No&rmal'
-          Checked = True
-          State = cbChecked
           TabOrder = 5
           OnClick = Rebuild
         end
