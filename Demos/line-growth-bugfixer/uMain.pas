@@ -149,7 +149,7 @@ begin
   for j := 0 to Length(Points[i])-1 do
   begin
     with Normals[i,j] do
-      if (X = 0) and (X = 0) then
+      if (X = 0) and (Y = 0) then
         Continue;
     //if flip then
     begin
