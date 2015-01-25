@@ -3,7 +3,7 @@ object frmMain: TfrmMain
   Top = 31
   Width = 928
   Height = 681
-  Caption = 'LineGrow Benchmark'
+  Caption = 'LineGrow Debugger'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
