@@ -466,11 +466,13 @@ procedure TfrmMain.DoRender_GR32(Buffer : TBitmap32; const Points:TArrayOfArrayO
 var
   Dst : TArrayOfArrayOfFloatPoint;
 begin
-    PolyPolylineFS( Buffer, Points, clBlue32 and FillOpacity, True, ALineWidth,
-      AJoinStyle, AEndStyle, AMiterLimit, Transformation);
+    //PolyPolylineFS( Buffer, Points, clBlue32 and FillOpacity, True, ALineWidth,
+      //AJoinStyle, AEndStyle, AMiterLimit, Transformation);
 
   Dst := BuildPolyPolyLine(Points, chkStrokeClosed.Checked, ALineWidth, AJoinStyle  , AEndStyle, AMiterLimit  );
   //PolyPolylineFS( Graphics, Dst, clTrRed32, True,1,jsMiter, esButt, 4, TGP);
+
+  PolyPolygonFS(Buffer, Dst, clBlue32  and FillOpacity, pfWinding, Transformation);
 
   if chkDebugRoute.Checked then
     PolyPolylineFS(Buffer, Dst, clBlue32, True, 1, jsMiter, esButt, 2, Transformation);
